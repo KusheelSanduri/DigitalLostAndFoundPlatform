@@ -3,3 +3,4 @@ This is the template created for MERN project for SSL Lab in Moonsoon 2025 for M
 ## Team Contributions
 - Setup for amisha gupta completed on September 22, 2025. Ready for the challenge!
 - Setup for varun done. Ready for the challenge!
+- Setup for kusheel done. Ready for the challenge!
