@@ -8,8 +8,11 @@ export const authMiddleware = (
 	res: Response,
 	next: NextFunction
 ): void => {
-
-	if (req.path.startsWith("/auth") || req.path.startsWith("/public")) {
+	if (
+		req.path.startsWith("/auth/login") ||
+		req.path.startsWith("/auth/register") ||
+		req.path.startsWith("/public")
+	) {
 		return next();
 	}
 
