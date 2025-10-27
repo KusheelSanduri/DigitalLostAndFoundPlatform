@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { IUser, User } from "../models/User";
 import { Schema } from "mongoose";
+import { Request } from "express";
 
 export const JWT_SECRET = "lost&found-secret-key";
 
@@ -26,7 +27,7 @@ export class AuthService {
 			if (!/@nitc\.ac\.in$/.test(email)) {
 				throw new Error("Registration restricted to NITC email");
 			}
-				
+
 			const hashedPassword = await bcrypt.hash(password, 10);
 
 			const newUser = await User.create({
@@ -53,9 +54,8 @@ export class AuthService {
 
 	static async loginUser(email: string, password: string) {
 		try {
-
 			const user = await User.findOne({ email });
-			
+
 			if (!user) {
 				throw new Error("Invalid credentials");
 			}
@@ -71,9 +71,19 @@ export class AuthService {
 				email: user.email,
 				role: user.role,
 			};
-			
+
 			const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
 			return { token, user };
+		} catch (error: any) {
+			throw new Error(error.message);
+		}
+	}
+
+	static async me(req: Request) {
+		try {
+			return { 
+				user: (req as any).user 
+			};
 		} catch (error: any) {
 			throw new Error(error.message);
 		}
