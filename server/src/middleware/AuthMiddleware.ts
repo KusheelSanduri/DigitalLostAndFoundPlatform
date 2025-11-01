@@ -1,36 +1,28 @@
-// src/middleware/AuthMiddleware.ts
 import { Request, Response, NextFunction } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
-import { JWT_SECRET, JWTPayload } from "../services/AuthService";
+import jwt from "jsonwebtoken";
 
-export const authMiddleware = (
-	req: Request,
+export interface AuthRequest extends Request {
+	user?: { id: string; email: string };
+}
+
+export function requireAuth(
+	req: AuthRequest,
 	res: Response,
 	next: NextFunction
-): void => {
-	if (
-		req.path.startsWith("/auth/login") ||
-		req.path.startsWith("/auth/register") ||
-		req.path.startsWith("/public")
-	) {
-		return next();
-	}
-
+) {
 	const authHeader = req.headers.authorization;
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		res.status(401).json({
-			message: "Missing or Invalid Auth Token",
-		});
-		return;
-	}
-
-	const token = authHeader.split(" ")[1];
-
+	const token = authHeader?.startsWith("Bearer ")
+		? authHeader.slice(7)
+		: undefined;
+	if (!token) return res.status(401).json({ message: "No token" });
 	try {
-		const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-		(req as any).user = decoded;
+		const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
+			sub: string;
+			email: string;
+		};
+		req.user = { id: payload.sub, email: payload.email };
 		next();
 	} catch {
-		res.status(401).json({ message: "Invalid or expired token" });
+		return res.status(401).json({ message: "Invalid or expired token" });
 	}
-};
+}

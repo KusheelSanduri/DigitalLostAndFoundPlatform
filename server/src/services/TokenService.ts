@@ -11,21 +11,14 @@ import { IUser } from "../models/User";
  * - JWT signing for authenticated sessions
  */
 export class TokenService {
-	private readonly jwtSecret: string;
+	private static readonly JWT_SECRET = process.env.JWT_SECRET!;
 
-	constructor(jwtSecret: string) {
-		if (!jwtSecret) {
-			throw new Error("JWT secret key must be provided.");
-		}
-		this.jwtSecret = jwtSecret;
-	}
-
-	public generateRandomToken(): string {
+	public static generateRandomToken(): string {
 		return crypto.randomBytes(32).toString("hex");
 	}
 
-	public signJwt(user: IUser): string {
-		return jwt.sign({ sub: user._id, email: user.email }, this.jwtSecret, {
+	public static signJwt(user: IUser): string {
+		return jwt.sign({ sub: user._id, email: user.email }, this.JWT_SECRET, {
 			expiresIn: "7d",
 		});
 	}

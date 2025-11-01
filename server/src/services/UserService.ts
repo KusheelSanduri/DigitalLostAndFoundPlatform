@@ -4,20 +4,20 @@ import { User, IUser } from "../models/User";
 
 export class UserService {
 
-	private readonly saltRounds = 10;
+	private static readonly saltRounds = 10;
 
-	public async createUser(email: string, password: string): Promise<IUser> {
+	public static async createUser(email: string, password: string): Promise<IUser> {
 		const passwordHash = await bcrypt.hash(password, this.saltRounds);
 		const user = new User({ email, passwordHash });
 		await user.save();
 		return user;
 	}
 
-	public findByEmail(email: string): Promise<IUser | null> {
+	public static findByEmail(email: string): Promise<IUser | null> {
 		return User.findOne({ email });
 	}
 
-	public async setVerifyToken(user: IUser, token: string): Promise<void> {
+	public static async setVerifyToken(user: IUser, token: string): Promise<void> {
 		user.verifyTokenHash = crypto
 			.createHash("sha256")
 			.update(token)
@@ -26,7 +26,7 @@ export class UserService {
 		await user.save();
 	}
 
-	public async verifyUserEmail(
+	public static async verifyUserEmail(
 		email: string,
 		token: string
 	): Promise<IUser | null> {
@@ -48,14 +48,14 @@ export class UserService {
 		return user;
 	}
 
-	public async validatePassword(
+	public static async validatePassword(
 		user: IUser,
 		password: string
 	): Promise<boolean> {
 		return bcrypt.compare(password, user.passwordHash);
 	}
 
-	public async setResetToken(user: IUser, token: string): Promise<void> {
+	public static async setResetToken(user: IUser, token: string): Promise<void> {
 		user.resetTokenHash = crypto
 			.createHash("sha256")
 			.update(token)
@@ -64,7 +64,7 @@ export class UserService {
 		await user.save();
 	}
 
-	public async resetPassword(
+	public static async resetPassword(
 		email: string,
 		token: string,
 		newPassword: string
