@@ -8,16 +8,16 @@ export class AuthController {
 	private static ORG_DOMAIN = process.env.ORGANIZATION_DOMAIN!;
 
 	public static async register(req: Request, res: Response): Promise<void> {
-		const { email, password } = req.body;
+		const { name, email, password } = req.body;
 
-		if (!email || !password) {
+		if (!name || !email || !password) {
 			res.status(400).json({ message: "Missing fields." });
 			return;
 		}
 
 		const domain = email.split("@")[1];
 
-		if (this.ORG_DOMAIN && domain !== this.ORG_DOMAIN) {
+		if (AuthController.ORG_DOMAIN && domain !== AuthController.ORG_DOMAIN) {
 			res.status(400).json({ message: "Organization email required" });
 			return;
 		}
@@ -27,7 +27,7 @@ export class AuthController {
 			return;
 		}
 
-		const user = await UserService.createUser(email, password);
+		const user = await UserService.createUser(name, email, password);
 		const token = TokenService.generateRandomToken();
 		await UserService.setVerifyToken(user, token);
 		await NodeMailerEmailService.sendVerificationEmail(email, token);
@@ -53,7 +53,10 @@ export class AuthController {
 		}
 
 		if (!user.isVerified) {
-			res.status(403).json({ message: "Email not verified" });
+			res.status(403).json({
+				message:
+					"Email not verified. Please Verify your email before logging in",
+			});
 			return;
 		}
 
