@@ -3,9 +3,11 @@ import { UserService } from "../services/UserService";
 import { TokenService } from "../services/TokenService";
 import { NodeMailerEmailService } from "../services/NodeMailerEmailService";
 import { AuthRequest } from "../middleware/AuthMiddleware";
+import { User } from "../models/User";
+import { envConfig } from "../config/envConfig";
 
 export class AuthController {
-	private static ORG_DOMAIN = process.env.ORGANIZATION_DOMAIN!;
+	private static ORG_DOMAIN = envConfig.ORGANIZATION_DOMAIN;
 
 	public static async register(req: Request, res: Response): Promise<void> {
 		const { name, email, password } = req.body;
@@ -34,6 +36,30 @@ export class AuthController {
 		res.json({
 			message:
 				"Registered. Check your email and click on the verification link to verify account.",
+		});
+	}
+
+	public static async resendVerificationLink(
+		req: Request,
+		res: Response
+	): Promise<void> {
+		const { email } = req.body;
+
+		if (!email) {
+			res.status(400).json({ message: "Missing Fields." });
+			return;
+		}
+
+		const user = await UserService.findByEmail(email);
+
+		if (!user || user.isVerified) {
+			throw new Error("If account exists, verification link sent");
+		}
+		const token = TokenService.generateRandomToken();
+		await UserService.setVerifyToken(user, token);
+		await NodeMailerEmailService.sendVerificationEmail(email, token);
+		res.json({
+			message: "If account exists, verification link sent",
 		});
 	}
 

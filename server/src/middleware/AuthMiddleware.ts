@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { envConfig } from "../config/envConfig";
 
 export interface AuthRequest extends Request {
 	user?: { id: string; email: string };
@@ -16,7 +17,7 @@ export function requireAuth(
 		: undefined;
 	if (!token) return res.status(401).json({ message: "No token" });
 	try {
-		const payload = jwt.verify(token, process.env.JWT_SECRET as string) as {
+		const payload = jwt.verify(token, envConfig.JWT_SECRET as string) as {
 			sub: string;
 			email: string;
 		};

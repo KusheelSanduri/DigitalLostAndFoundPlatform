@@ -3,11 +3,12 @@ import cors from "cors";
 import { AuthRouter } from "./routes/AuthRoutes";
 import { AuthRequest, requireAuth } from "./middleware/AuthMiddleware";
 import { AuthController } from "./controllers/AuthController";
+import { envConfig } from "./config/envConfig";
 
 const app = express();
 app.use(
 	cors({
-		origin: process.env.CLIENT_URL || "http://localhost:5173",
+		origin: envConfig.FRONTEND_URL || "http://localhost:5173",
 		credentials: true,
 	})
 );

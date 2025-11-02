@@ -9,5 +9,6 @@ router.post("/login", AuthController.login);
 router.get("/verify", AuthController.verify);
 router.post("/forgot", AuthController.forgot);
 router.post("/reset", AuthController.reset);
+router.post("/reverify", AuthController.resendVerificationLink);
 
 export { router as AuthRouter };
