@@ -32,14 +32,16 @@ export class PostController {
 	): Promise<void> {
 		// Fetch all posts with pagination
 		const page = parseInt(req.params.page) || 1;
-		const limit = 2;
+		const limit = 3;
 		const skip = (page - 1) * limit;
+		const totalPosts = await Post.countDocuments();
+		const totalPages = Math.ceil(totalPosts / limit);
 
 		const posts = await Post.find()
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit);
-		res.json(posts);
+		res.json({ posts, totalPages, currentPage: page });
 	}
 
 	public static async deletePost(
