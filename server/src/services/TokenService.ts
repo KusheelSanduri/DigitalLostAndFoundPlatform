@@ -18,7 +18,7 @@ export class TokenService {
 	}
 
 	public static signJwt(user: IUser): string {
-		return jwt.sign({ sub: user._id, email: user.email }, this.JWT_SECRET, {
+		return jwt.sign({ sub: user._id, email: user.email }, TokenService.JWT_SECRET, {
 			expiresIn: "7d",
 		});
 	}

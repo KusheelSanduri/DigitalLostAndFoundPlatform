@@ -1,27 +1,33 @@
 import nodemailer from "nodemailer";
-import { EmailServiceConfig, IEmailService } from "../interfaces/IEmailService";
+import { EmailServiceConfig } from "../interfaces/IEmailService";
+import { envConfig } from "../config/envConfig";
 
 export class NodeMailerEmailService {
 	private static config: EmailServiceConfig = {
-		host: process.env.EMAIL_HOST!,
-		port: Number(process.env.EMAIL_PORT!),
-		secure: process.env.EMAIL_SECURE === "true",
+		host: envConfig.EMAIL_HOST,
+		port: Number(envConfig.EMAIL_PORT),
+		secure: envConfig.EMAIL_SECURE,
 		auth: {
-			user: process.env.EMAIL_USER!,
-			pass: process.env.EMAIL_PASS!,
+			user: envConfig.EMAIL_USER,
+			pass: envConfig.EMAIL_PASS,
 		},
-		fromEmail: process.env.EMAIL_FROM!,
-		frontendUrl: process.env.FRONTEND_URL!,
+		fromEmail: envConfig.EMAIL_FROM,
+		frontendUrl: envConfig.FRONTEND_URL,
 	};
 
 	private static createTransport() {
+		console.log(
+			"Creating transport with config:",
+			NodeMailerEmailService.config
+		);
+
 		return nodemailer.createTransport({
-			host: this.config.host,
-			port: this.config.port,
-			secure: this.config.secure,
+			host: NodeMailerEmailService.config.host,
+			port: NodeMailerEmailService.config.port || 465,
+			secure: NodeMailerEmailService.config.secure,
 			auth: {
-				user: this.config.auth.user,
-				pass: this.config.auth.pass,
+				user: NodeMailerEmailService.config.auth.user,
+				pass: NodeMailerEmailService.config.auth.pass,
 			},
 		});
 	}
@@ -31,12 +37,12 @@ export class NodeMailerEmailService {
 		token: string
 	): Promise<void> {
 		const url = `${
-			this.config.frontendUrl
+			NodeMailerEmailService.config.frontendUrl
 		}/verify?token=${token}&email=${encodeURIComponent(email)}`;
-		const transporter = this.createTransport();
+		const transporter = NodeMailerEmailService.createTransport();
 
 		await transporter.sendMail({
-			from: this.config.fromEmail,
+			from: NodeMailerEmailService.config.fromEmail,
 			to: email,
 			subject: "LostAndFound - Verify your email",
 			text: `Click to verify: ${url}`,
@@ -48,12 +54,12 @@ export class NodeMailerEmailService {
 		token: string
 	): Promise<void> {
 		const url = `${
-			this.config.frontendUrl
+			NodeMailerEmailService.config.frontendUrl
 		}/reset?token=${token}&email=${encodeURIComponent(email)}`;
-		const transporter = this.createTransport();
+		const transporter = NodeMailerEmailService.createTransport();
 
 		await transporter.sendMail({
-			from: this.config.fromEmail,
+			from: NodeMailerEmailService.config.fromEmail,
 			to: email,
 			subject: "Reset your password",
 			text: `Reset link: ${url}`,
