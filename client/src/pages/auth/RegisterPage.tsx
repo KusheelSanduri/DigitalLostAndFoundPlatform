@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
 	Card,
 	CardContent,
@@ -13,16 +13,11 @@ import { Alert, AlertDescription } from "../../components/ui/alert";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Checkbox } from "../../components/ui/checkbox";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../../components/ui/select";
 import { Navbar } from "../../components/common/Navbar";
+import { useAuth } from "../../auth/useAuth";
 
 export function RegisterPage() {
+	const { register, user } = useAuth();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 	const [formData, setFormData] = useState({
@@ -38,6 +33,14 @@ export function RegisterPage() {
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [agreedToTerms, setAgreedToTerms] = useState(false);
+	const navigate = useNavigate();
+
+	// if already logged in, redirect to home
+	useEffect(() => {
+		if (user) {
+			navigate("/items");
+		}
+	}, [navigate, user]);
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
@@ -49,11 +52,11 @@ export function RegisterPage() {
 		setIsLoading(true);
 
 		// Validation
-		if (!formData.email.endsWith("@nitc.ac.in")) {
-			setError("Please use your NITC email address (@nitc.ac.in)");
-			setIsLoading(false);
-			return;
-		}
+		// if (!formData.email.endsWith("@nitc.ac.in")) {
+		// 	setError("Please use your NITC email address (@nitc.ac.in)");
+		// 	setIsLoading(false);
+		// 	return;
+		// }
 
 		if (formData.password !== formData.confirmPassword) {
 			setError("Passwords do not match");
@@ -75,10 +78,12 @@ export function RegisterPage() {
 
 		// Simulate signup process
 		try {
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-			// Redirect to verification or login page
-			window.location.href =
-				"/login?message=Account created successfully. Please sign in.";
+			await register(
+				formData.firstName + " " + formData.lastName,
+				formData.email,
+				formData.password
+			);
+			alert("Account created successfully! Please log in.");
 		} catch {
 			setError("Failed to create account. Please try again.");
 		} finally {
@@ -185,145 +190,89 @@ export function RegisterPage() {
 
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="rollNumber">
-											Roll No/Staff ID
+										<Label htmlFor="password">
+											Password
 										</Label>
-										<Input
-											id="rollNumber"
-											placeholder="B200XXX"
-											value={formData.rollNumber}
-											onChange={(e) =>
-												handleInputChange(
-													"rollNumber",
-													e.target.value
-												)
-											}
-											required
-											className="bg-background"
-										/>
+										<div className="relative">
+											<Input
+												id="password"
+												type={
+													showPassword
+														? "text"
+														: "password"
+												}
+												placeholder="Create a strong password"
+												value={formData.password}
+												onChange={(e) =>
+													handleInputChange(
+														"password",
+														e.target.value
+													)
+												}
+												required
+												className="bg-background pr-10"
+											/>
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+												onClick={() =>
+													setShowPassword(
+														!showPassword
+													)
+												}
+											>
+												{showPassword ? (
+													<EyeOff className="w-4 h-4" />
+												) : (
+													<Eye className="w-4 h-4" />
+												)}
+											</Button>
+										</div>
 									</div>
+
 									<div className="space-y-2">
-										<Label htmlFor="department">
-											Department
+										<Label htmlFor="confirmPassword">
+											Confirm Password
 										</Label>
-										<Select
-											value={formData.department}
-											onValueChange={(value: string) =>
-												handleInputChange(
-													"department",
-													value
-												)
-											}
-										>
-											<SelectTrigger className="bg-background">
-												<SelectValue placeholder="Select" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="cse">
-													Computer Science
-												</SelectItem>
-												<SelectItem value="ece">
-													Electronics & Communication
-												</SelectItem>
-												<SelectItem value="eee">
-													Electrical & Electronics
-												</SelectItem>
-												<SelectItem value="me">
-													Mechanical
-												</SelectItem>
-												<SelectItem value="ce">
-													Civil
-												</SelectItem>
-												<SelectItem value="che">
-													Chemical
-												</SelectItem>
-												<SelectItem value="other">
-													Other
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label htmlFor="password">Password</Label>
-									<div className="relative">
-										<Input
-											id="password"
-											type={
-												showPassword
-													? "text"
-													: "password"
-											}
-											placeholder="Create a strong password"
-											value={formData.password}
-											onChange={(e) =>
-												handleInputChange(
-													"password",
-													e.target.value
-												)
-											}
-											required
-											className="bg-background pr-10"
-										/>
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-											onClick={() =>
-												setShowPassword(!showPassword)
-											}
-										>
-											{showPassword ? (
-												<EyeOff className="w-4 h-4" />
-											) : (
-												<Eye className="w-4 h-4" />
-											)}
-										</Button>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label htmlFor="confirmPassword">
-										Confirm Password
-									</Label>
-									<div className="relative">
-										<Input
-											id="confirmPassword"
-											type={
-												showConfirmPassword
-													? "text"
-													: "password"
-											}
-											placeholder="Confirm your password"
-											value={formData.confirmPassword}
-											onChange={(e) =>
-												handleInputChange(
-													"confirmPassword",
-													e.target.value
-												)
-											}
-											required
-											className="bg-background pr-10"
-										/>
-										<Button
-											type="button"
-											variant="ghost"
-											size="sm"
-											className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-											onClick={() =>
-												setShowConfirmPassword(
-													!showConfirmPassword
-												)
-											}
-										>
-											{showConfirmPassword ? (
-												<EyeOff className="w-4 h-4" />
-											) : (
-												<Eye className="w-4 h-4" />
-											)}
-										</Button>
+										<div className="relative">
+											<Input
+												id="confirmPassword"
+												type={
+													showConfirmPassword
+														? "text"
+														: "password"
+												}
+												placeholder="Confirm your password"
+												value={formData.confirmPassword}
+												onChange={(e) =>
+													handleInputChange(
+														"confirmPassword",
+														e.target.value
+													)
+												}
+												required
+												className="bg-background pr-10"
+											/>
+											<Button
+												type="button"
+												variant="ghost"
+												size="sm"
+												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+												onClick={() =>
+													setShowConfirmPassword(
+														!showConfirmPassword
+													)
+												}
+											>
+												{showConfirmPassword ? (
+													<EyeOff className="w-4 h-4" />
+												) : (
+													<Eye className="w-4 h-4" />
+												)}
+											</Button>
+										</div>
 									</div>
 								</div>
 

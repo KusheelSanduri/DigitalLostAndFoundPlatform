@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Navbar } from "../../components/common/Navbar";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -12,17 +12,34 @@ import {
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Alert, AlertDescription } from "../../components/ui/alert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../auth/useAuth";
 
 export function LoginPage() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const [error, setError] = useState("");
+	const [error] = useState("");
 	const [showPassword, setShowPassword] = useState(false);
 
-	const handleSubmit = () => {
-		console.log("Login form submitted...");
+	const { login, user } = useAuth();
+	const navigate = useNavigate();
+
+	// if already logged in, redirect to items page
+	useEffect(() => {
+		if (user) {
+			navigate("/items");
+		}
+	}, [navigate, user]);
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		try {
+			await login(email, password);
+			alert("Logged in successfully!");
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			alert(err.response?.data?.message || "Login failed");
+		}
 	};
 
 	return (

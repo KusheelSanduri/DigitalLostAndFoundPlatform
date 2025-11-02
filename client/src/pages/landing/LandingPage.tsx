@@ -9,8 +9,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "../../components/ui/card";
+import { useAuth } from "../../auth/useAuth";
 
 export function LandingPage() {
+	const { user } = useAuth();
 	return (
 		<div className="min-h-screen bg-background">
 			<Navbar />
@@ -171,9 +173,20 @@ export function LandingPage() {
 									Be part of a caring community that helps
 									each other find what matters most.
 								</p>
-								<Link to="/register">
-									<Button size="lg">Get Started Today</Button>
-								</Link>
+								{user == null ? (
+									<Link to="/register">
+										<Button size="lg">
+											Get Started Today
+										</Button>
+									</Link>
+								) : (
+									<Button
+										size="lg"
+										disabled
+									>
+										You are already logged in
+									</Button>
+								)}
 							</div>
 						</div>
 					</div>

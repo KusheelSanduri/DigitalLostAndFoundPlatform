@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Navbar } from "../../components/common/Navbar";
-import { Link, useNavigate } from "react-router-dom";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "../../components/ui/button";
 import {
@@ -12,13 +11,14 @@ import {
 } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
 import { authApi } from "../../api/authApi";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../auth/useAuth";
 
-export function ForgotPasswordPage() {
-	const { user } = useAuth();
+export function ResendVerificationLinkPage() {
 	const [email, setEmail] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
+	const { user } = useAuth();
 
 	// if already logged in, redirect to items page
 	useEffect(() => {
@@ -31,10 +31,10 @@ export function ForgotPasswordPage() {
 		try {
 			e.preventDefault();
 			setIsLoading(true);
-			await authApi.forgotPassword(email);
-			alert("Reset link sent! Check your mailbox");
+			await authApi.resendVerificationLink(email);
+			alert("Verification link sent! Check your mailbox");
 		} catch {
-			alert("Failed to send reset link. Please try again.");
+			alert("Failed to send verification link. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -47,10 +47,11 @@ export function ForgotPasswordPage() {
 				<div className="w-full max-w-md">
 					<Card>
 						<CardHeader className="text-center">
-							<CardTitle>Forgot Password?</CardTitle>
+							<CardTitle>Verify your Email</CardTitle>
 							<CardDescription>
-								Enter your NITC email address and we'll send you
-								a reset link
+								If you want us to resend the verification link,
+								enter your email with which you registered
+								below.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -85,22 +86,10 @@ export function ForgotPasswordPage() {
 									disabled={isLoading}
 								>
 									{isLoading
-										? "Sending Reset Link..."
-										: "Send Reset Link"}
+										? "Sending Verification Link..."
+										: "Send Verification Link"}
 								</Button>
 							</form>
-
-							<div className="mt-6 text-center">
-								<p className="text-sm text-muted-foreground">
-									Remember your password?{" "}
-									<Link
-										to="/login"
-										className="text-primary hover:underline font-medium"
-									>
-										Sign in here
-									</Link>
-								</p>
-							</div>
 						</CardContent>
 					</Card>
 				</div>

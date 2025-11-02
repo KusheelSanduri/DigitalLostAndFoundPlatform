@@ -1,8 +1,8 @@
 import axiosClient from "./axiosClient";
 
 export const authApi = {
-	register: (email: string, password: string) =>
-		axiosClient.post("/api/auth/register", { email, password }),
+	register: (name: string, email: string, password: string) =>
+		axiosClient.post("/api/auth/register", { name, email, password }),
 
 	login: (email: string, password: string) =>
 		axiosClient.post("/api/auth/login", { email, password }),
@@ -15,4 +15,7 @@ export const authApi = {
 
 	resetPassword: (email: string, token: string, newPassword: string) =>
 		axiosClient.post("/api/auth/reset", { email, token, newPassword }),
+
+	resendVerificationLink: (email: string) =>
+		axiosClient.post("/api/auth/reverify", { email }),
 };

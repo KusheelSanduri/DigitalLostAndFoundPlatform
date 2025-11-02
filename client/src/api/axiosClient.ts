@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-	baseURL: import.meta.env.BACKEND_API_URL || "http://localhost:4000/api",
+	baseURL: import.meta.env.BACKEND_API_URL || "http://localhost:5000",
 	withCredentials: true,
 });
 
