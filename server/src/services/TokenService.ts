@@ -20,7 +20,7 @@ export class TokenService {
 
 	public static signJwt(user: IUser): string {
 		return jwt.sign(
-			{ sub: user._id, email: user.email },
+			{ sub: user._id, email: user.email, role: user.role },
 			TokenService.JWT_SECRET,
 			{
 				expiresIn: "7d",

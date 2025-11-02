@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { envConfig } from "../config/envConfig";
 
 export interface AuthRequest extends Request {
-	user?: { id: string; email: string };
+	user?: { id: string; email: string; role?: string };
 }
 
 export function requireAuth(
@@ -20,8 +20,13 @@ export function requireAuth(
 		const payload = jwt.verify(token, envConfig.JWT_SECRET as string) as {
 			sub: string;
 			email: string;
+			role: string;
 		};
-		req.user = { id: payload.sub, email: payload.email };
+		req.user = {
+			id: payload.sub,
+			email: payload.email,
+			role: payload.role,
+		};
 		next();
 	} catch {
 		return res.status(401).json({ message: "Invalid or expired token" });
