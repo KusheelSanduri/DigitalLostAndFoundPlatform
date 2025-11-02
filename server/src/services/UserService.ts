@@ -3,12 +3,18 @@ import bcrypt from "bcryptjs";
 import { User, IUser } from "../models/User";
 
 export class UserService {
-
 	private static readonly saltRounds = 10;
 
-	public static async createUser(email: string, password: string): Promise<IUser> {
-		const passwordHash = await bcrypt.hash(password, this.saltRounds);
-		const user = new User({ email, passwordHash });
+	public static async createUser(
+		name: string,
+		email: string,
+		password: string
+	): Promise<IUser> {
+		const passwordHash = await bcrypt.hash(
+			password,
+			UserService.saltRounds
+		);
+		const user = new User({ name, email, passwordHash });
 		await user.save();
 		return user;
 	}
@@ -17,7 +23,10 @@ export class UserService {
 		return User.findOne({ email });
 	}
 
-	public static async setVerifyToken(user: IUser, token: string): Promise<void> {
+	public static async setVerifyToken(
+		user: IUser,
+		token: string
+	): Promise<void> {
 		user.verifyTokenHash = crypto
 			.createHash("sha256")
 			.update(token)
@@ -55,7 +64,10 @@ export class UserService {
 		return bcrypt.compare(password, user.passwordHash);
 	}
 
-	public static async setResetToken(user: IUser, token: string): Promise<void> {
+	public static async setResetToken(
+		user: IUser,
+		token: string
+	): Promise<void> {
 		user.resetTokenHash = crypto
 			.createHash("sha256")
 			.update(token)
@@ -80,7 +92,10 @@ export class UserService {
 		});
 		if (!user) return null;
 
-		user.passwordHash = await bcrypt.hash(newPassword, this.saltRounds);
+		user.passwordHash = await bcrypt.hash(
+			newPassword,
+			UserService.saltRounds
+		);
 		user.resetTokenHash = undefined;
 		user.resetTokenExpires = undefined;
 		await user.save();
