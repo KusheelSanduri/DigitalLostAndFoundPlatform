@@ -1,16 +1,25 @@
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import { AuthRouter } from "./routes/AuthRoutes";
-import { authMiddleware } from "./middleware/AuthMiddleware";
-
-dotenv.config();
+import { AuthRequest, requireAuth } from "./middleware/AuthMiddleware";
+import { AuthController } from "./controllers/AuthController";
+import { envConfig } from "./config/envConfig";
+import { PostRouter } from "./routes/PostRoutes";
 
 const app = express();
-app.use(cors());
+app.use(
+	cors({
+		origin: envConfig.FRONTEND_URL || "http://localhost:5173",
+		credentials: true,
+	})
+);
 app.use(express.json());
-app.use(authMiddleware);
 
-app.use("/auth", AuthRouter);
+app.use("/api/auth", AuthRouter);
+app.use("/api/posts", requireAuth, PostRouter);
+
+app.get("/api/me", requireAuth, (req: AuthRequest, res) => {
+	AuthController.me(req, res);
+});
 
 export default app;

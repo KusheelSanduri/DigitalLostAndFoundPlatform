@@ -1,8 +1,11 @@
 import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "../ui/button";
+import { useAuth } from "../../auth/useAuth";
 
 export function Navbar() {
+	const { user, logout } = useAuth();
+
 	return (
 		<header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 h-[70px]">
 			<div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -19,7 +22,7 @@ export function Navbar() {
 						to="/posts"
 						className="text-muted-foreground hover:text-foreground transition-colors"
 					>
-						Browse Items
+						Posts
 					</Link>
 					<Link
 						to="/about"
@@ -35,12 +38,28 @@ export function Navbar() {
 					</Link>
 				</nav>
 				<div className="flex items-center gap-3">
-					<Link to="/login">
-						<Button variant="ghost">Login</Button>
-					</Link>
-					<Link to="/register">
-						<Button>Get Started</Button>
-					</Link>
+					{user == null ? (
+						<>
+							<Link to="/register">
+								<Button>Register</Button>
+							</Link>
+							<Link to="/login">
+								<Button variant="ghost">Login</Button>
+							</Link>
+						</>
+					) : (
+						<>
+							<Link to="/posts">
+								<Button>Go to Posts</Button>
+							</Link>
+							<Button
+								variant="ghost"
+								onClick={() => logout()}
+							>
+								Logout
+							</Button>
+						</>
+					)}
 				</div>
 			</div>
 		</header>
