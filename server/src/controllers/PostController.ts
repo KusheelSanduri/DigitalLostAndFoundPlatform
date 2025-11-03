@@ -34,10 +34,26 @@ export class PostController {
 		const page = parseInt(req.params.page) || 1;
 		const limit = 3;
 		const skip = (page - 1) * limit;
-		const totalPosts = await Post.countDocuments();
+
+		const searchQuery = req.query.search as string;
+		const categoryFilter = req.query.category as string;
+		const locationFilter = req.query.location as string;
+		let filter: any = {};
+
+		if (searchQuery) {
+			filter.$or = [{ title: { $regex: searchQuery, $options: "i" }, description: { $regex: searchQuery, $options: "i" } }];
+		}
+		if (categoryFilter && categoryFilter !== "all") {
+			filter.type = categoryFilter;
+		}
+		if (locationFilter && locationFilter !== "all") {
+			filter.location = locationFilter;
+		}
+
+		const totalPosts = await Post.countDocuments(filter);
 		const totalPages = Math.ceil(totalPosts / limit);
 
-		const posts = await Post.find()
+		const posts = await Post.find(filter)
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit);
