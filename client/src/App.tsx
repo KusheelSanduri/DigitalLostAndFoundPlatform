@@ -4,6 +4,7 @@ import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ResendVerificationLinkPage } from "./pages/auth/ResendVerificationLinkPage";
+import AllPostsPage from "./pages/posts/AllPostsPage";
 
 function App() {
 	return (
@@ -27,6 +28,10 @@ function App() {
 			<Route
 				path="/resend-verification-link"
 				element={<ResendVerificationLinkPage />}
+			/>
+			<Route
+				path="/items"
+				element={<AllPostsPage />}
 			/>
 		</Routes>
 	);
