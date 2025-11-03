@@ -40,4 +40,8 @@ export const postsApi = {
 	},
 
 	deletePost: (postId: string) => axiosClient.delete(`/api/posts/${postId}`),
+
+	getCategories: () => axiosClient.get("/api/posts/categories"),
+
+	getLocations: () => axiosClient.get("/api/posts/locations"),
 };

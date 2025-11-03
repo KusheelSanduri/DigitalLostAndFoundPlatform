@@ -5,6 +5,7 @@ import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ResendVerificationLinkPage } from "./pages/auth/ResendVerificationLinkPage";
 import AllPostsPage from "./pages/posts/AllPostsPage";
+import CreatePostPage from "./pages/posts/CreatePostPage";
 
 function App() {
 	return (
@@ -32,6 +33,10 @@ function App() {
 			<Route
 				path="/posts"
 				element={<AllPostsPage />}
+			/>
+			<Route
+				path="/posts/create"
+				element={<CreatePostPage />}
 			/>
 		</Routes>
 	);
