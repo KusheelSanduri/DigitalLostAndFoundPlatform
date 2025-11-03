@@ -22,4 +22,9 @@ router.post("/", PostController.createPost);
  */
 router.delete("/:postId", PostController.deletePost);
 
+
+router.get("/categories", PostController.getCategories);
+
+router.get("/locations", PostController.getLocations);
+
 export { router as PostRouter };

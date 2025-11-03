@@ -1,6 +1,8 @@
 import { Response } from "express";
 import { AuthRequest } from "../middleware/AuthMiddleware";
 import { Post } from "../models/Post";
+import { categories } from "../utils/categories";
+import { locations } from "../utils/location";
 
 export class PostController {
 	public static async createPost(
@@ -41,7 +43,12 @@ export class PostController {
 		let filter: any = {};
 
 		if (searchQuery) {
-			filter.$or = [{ title: { $regex: searchQuery, $options: "i" }, description: { $regex: searchQuery, $options: "i" } }];
+			filter.$or = [
+				{
+					title: { $regex: searchQuery, $options: "i" },
+					description: { $regex: searchQuery, $options: "i" },
+				},
+			];
 		}
 		if (categoryFilter && categoryFilter !== "all") {
 			filter.type = categoryFilter;
@@ -84,5 +91,19 @@ export class PostController {
 
 		await Post.findByIdAndDelete(postId);
 		res.json({ message: "Post deleted successfully." });
+	}
+
+	public static async getCategories(
+		req: AuthRequest,
+		res: Response
+	): Promise<void> {
+		res.json(categories);
+	}
+
+	public static async getLocations(
+		req: AuthRequest,
+		res: Response
+	): Promise<void> {
+		res.json(locations);
 	}
 }

@@ -1,0 +1,15 @@
+export const categories: string[] = [
+	"ID / Cards / Credentials",
+	"Money and Wallets",
+	"Electronics",
+	"Keys",
+	"Bags and Cases",
+	"Books / Documents",
+	"Clothing",
+	"Footwear and Sports Gear",
+	"Health and Personal Care",
+	"Art, Music, and Design Equipment",
+	"Tools and Technical Equipment",
+	"Transportation and Mobility",
+	"Miscellaneous/Unclassified",
+];
