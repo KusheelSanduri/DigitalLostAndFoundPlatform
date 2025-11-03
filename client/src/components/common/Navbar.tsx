@@ -49,8 +49,8 @@ export function Navbar() {
 						</>
 					) : (
 						<>
-							<Link to="/items">
-								<Button>Go to Items</Button>
+							<Link to="/posts">
+								<Button>Go to Posts</Button>
 							</Link>
 							<Button
 								variant="ghost"

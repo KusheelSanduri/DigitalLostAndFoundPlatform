@@ -30,7 +30,7 @@ function App() {
 				element={<ResendVerificationLinkPage />}
 			/>
 			<Route
-				path="/items"
+				path="/posts"
 				element={<AllPostsPage />}
 			/>
 		</Routes>

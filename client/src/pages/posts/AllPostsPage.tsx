@@ -40,13 +40,20 @@ export default function AllPostsPage() {
 	}, []);
 
 	useEffect(() => {
-		postsApi.getPosts(currentPage, searchQuery).then((response) => {
-			console.log("Fetched posts with query:", response.data.posts);
-			setPosts(response.data.posts);
-			setCurrentPage(response.data.currentPage);
-			setTotalPages(response.data.totalPages);
-		});
-	}, [searchQuery, currentPage]);
+		postsApi
+			.getPosts(
+				currentPage,
+				searchQuery,
+				selectedCategory,
+				selectedLocation
+			)
+			.then((response) => {
+				console.log("Fetched posts with query:", response.data.posts);
+				setPosts(response.data.posts);
+				setCurrentPage(response.data.currentPage);
+				setTotalPages(response.data.totalPages);
+			});
+	}, [searchQuery, currentPage, selectedCategory, selectedLocation]);
 
 	const categories = [
 		"all",

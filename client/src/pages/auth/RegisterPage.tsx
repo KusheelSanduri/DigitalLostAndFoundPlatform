@@ -38,7 +38,7 @@ export function RegisterPage() {
 	// if already logged in, redirect to home
 	useEffect(() => {
 		if (user) {
-			navigate("/items");
+			navigate("/posts");
 		}
 	}, [navigate, user]);
 

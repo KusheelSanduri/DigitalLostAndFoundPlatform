@@ -27,7 +27,7 @@ export function LoginPage() {
 	// if already logged in, redirect to items page
 	useEffect(() => {
 		if (user) {
-			navigate("/items");
+			navigate("/posts");
 		}
 	}, [navigate, user]);
 

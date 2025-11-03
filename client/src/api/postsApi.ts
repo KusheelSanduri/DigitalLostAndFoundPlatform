@@ -18,7 +18,26 @@ export const postsApi = {
 			keywords,
 		}),
 
-    getPosts: (page: number, query?: string) => axiosClient.get(`/api/posts/${page}${query ? `?q=${query}` : ""}`),
+	getPosts: (page: number, sq?: string, cat?: string, loc?: string) => {
+		let endpointURL = `/api/posts/${page}`;
+		const isFilterPresent = sq || cat || loc;
+		if (isFilterPresent) {
+			endpointURL += "?";
+		}
 
-    deletePost: (postId: string) => axiosClient.delete(`/api/posts/${postId}`),
+		if (sq) {
+			endpointURL += `search=${sq}&`;
+		}
+
+		if (cat) {
+			endpointURL += `category=${cat}&`;
+		}
+
+		if (loc) {
+			endpointURL += `location=${loc}&`;
+		}
+		return axiosClient.get(`${endpointURL}`);
+	},
+
+	deletePost: (postId: string) => axiosClient.delete(`/api/posts/${postId}`),
 };
