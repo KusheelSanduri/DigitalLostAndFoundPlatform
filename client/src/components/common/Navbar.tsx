@@ -22,7 +22,7 @@ export function Navbar() {
 						to="/posts"
 						className="text-muted-foreground hover:text-foreground transition-colors"
 					>
-						Browse Items
+						Posts
 					</Link>
 					<Link
 						to="/about"
