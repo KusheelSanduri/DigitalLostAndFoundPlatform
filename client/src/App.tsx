@@ -3,6 +3,9 @@ import { LandingPage } from "./pages/landing/LandingPage";
 import { LoginPage } from "./pages/auth/LoginPage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
+import { ResendVerificationLinkPage } from "./pages/auth/ResendVerificationLinkPage";
+import AllPostsPage from "./pages/posts/AllPostsPage";
+import CreatePostPage from "./pages/posts/CreatePostPage";
 
 function App() {
 	return (
@@ -22,6 +25,18 @@ function App() {
 			<Route
 				path="/forgot-password"
 				element={<ForgotPasswordPage />}
+			/>
+			<Route
+				path="/resend-verification-link"
+				element={<ResendVerificationLinkPage />}
+			/>
+			<Route
+				path="/posts"
+				element={<AllPostsPage />}
+			/>
+			<Route
+				path="/posts/create"
+				element={<CreatePostPage />}
 			/>
 		</Routes>
 	);

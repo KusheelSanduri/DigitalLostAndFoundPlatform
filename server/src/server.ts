@@ -1,10 +1,10 @@
 import app from "./app";
-import mongoose, { Types } from "mongoose";
-import { Notification } from "./models/Notification";
-import { NotificationService } from "./services/NotificationService";
+import mongoose from "mongoose";
+import "./config/envConfig";
+import { envConfig } from "./config/envConfig";
 
-const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI!;
+const PORT = envConfig.PORT || 5000;
+const MONGO_URI = envConfig.MONGO_URI;
 
 mongoose.connect(MONGO_URI)
     .then(async () => {
