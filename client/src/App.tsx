@@ -10,70 +10,79 @@ import { VerifyEmailPage } from "./pages/auth/VerifyEmailPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import PostChatPage from "./pages/posts/PostChatPage";
 import NoChatPage from "./pages/posts/NoChatPage";
+import AdminDashboard from "./pages/admin/page";
+import AdminDisputesPage from "./pages/admin/dispute";
 
-function App ()
-{
+function App() {
 	return (
 		<Routes>
 			<Route
 				path="/"
-				element={ <LandingPage /> }
+				element={<LandingPage />}
 			/>
 			<Route
 				path="/login"
-				element={ <LoginPage /> }
+				element={<LoginPage />}
 			/>
 			<Route
 				path="/register"
-				element={ <RegisterPage /> }
+				element={<RegisterPage />}
 			/>
 			<Route
 				path="/forgot-password"
-				element={ <ForgotPasswordPage /> }
+				element={<ForgotPasswordPage />}
 			/>
 			<Route
 				path="/resend-verification-link"
-				element={ <ResendVerificationLinkPage /> }
+				element={<ResendVerificationLinkPage />}
 			/>
 			<Route
 				path="/verify"
-				element={ <VerifyEmailPage /> }
+				element={<VerifyEmailPage />}
 			/>
 			<Route
 				path="/reset"
-				element={ <ResetPasswordPage /> }
+				element={<ResetPasswordPage />}
 			/>
 			<Route
 				path="/resend-verification-link"
-				element={ <ResendVerificationLinkPage /> }
+				element={<ResendVerificationLinkPage />}
 			/>
 			<Route
 				path="/verify"
-				element={ <VerifyEmailPage /> }
+				element={<VerifyEmailPage />}
 			/>
 			<Route
 				path="/reset"
-				element={ <ResetPasswordPage /> }
+				element={<ResetPasswordPage />}
 			/>
 			<Route
 				path="/resend-verification-link"
-				element={ <ResendVerificationLinkPage /> }
+				element={<ResendVerificationLinkPage />}
 			/>
 			<Route
 				path="/posts"
-				element={ <AllPostsPage /> }
+				element={<AllPostsPage />}
 			/>
 			<Route
 				path="/posts/create"
-				element={ <CreatePostPage /> }
+				element={<CreatePostPage />}
+			/>
+			<Route
+				path="/admin/dashboard"
+				element={<AdminDashboard />}
+			/>
+			<Route
+				path="/admin/disputes"
+				element={<AdminDisputesPage />}
 			/>
 			<Route
 				path="/chat"
-				element={ <NoChatPage /> }
+				element={<NoChatPage />}
 			/>
 			<Route
 				path="/chat/:postId"
-				element={ <PostChatPage /> }
+				element={<PostChatPage />}
 			/>
 		</Routes>
 	);
