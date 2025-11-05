@@ -10,6 +10,7 @@
 //         "ownerId": "69068860283630366475ef7c",
 //         "createdAt": "2025-11-02T07:29:53.747Z",
 //         "__v": 0
+//         // priority: "high|medium|low" (removed)
 //     }
 
 import { MapPin, Calendar, MessageCircle } from "lucide-react";
@@ -45,16 +46,12 @@ export function PostCard({ post }: PostCardProps) {
 		description,
 		location,
 		date,
-		keywords,
 		type,
-		ownerId,
-		createdAt,
 	} = post;
 
 	const imageUrl =
 		"https://m.media-amazon.com/images/I/71qa1cXgV6L._AC_UF1000,1000_QL80_.jpg";
 
-	const status: "claimed" | "unclaimed" = "unclaimed"; // Placeholder for post status
 	return (
 		<Card
 			key={_id}
@@ -73,16 +70,13 @@ export function PostCard({ post }: PostCardProps) {
 					>
 						{type === "lost" ? "Lost" : "Found"}
 					</Badge>
-
-					{
-						// if staus is claimed, show claimed badge
-						<Badge
-							variant="outline"
-							className="absolute top-2 right-2 bg-background"
-						>
-							Claimed
-						</Badge>
-					}
+					{/* Claimed badge remains, no priority badge */}
+					<Badge
+						variant="outline"
+						className="absolute top-2 right-2 bg-background"
+					>
+						Claimed
+					</Badge>
 				</div>
 				<CardHeader className="pb-2">
 					<CardTitle className="text-lg line-clamp-1">
@@ -115,7 +109,6 @@ export function PostCard({ post }: PostCardProps) {
 									Comments
 								</Button>
 							</Link>
-							{/* <div className="flex items-center gap-1 border-2 px-2 py-1 rounded-md border-muted-foreground cursor-pointer"></div> */}
 						</div>
 					</div>
 				</CardContent>

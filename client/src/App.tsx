@@ -6,6 +6,8 @@ import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ResendVerificationLinkPage } from "./pages/auth/ResendVerificationLinkPage";
 import AllPostsPage from "./pages/posts/AllPostsPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
+import AdminDashboard from "./pages/admin/page";
+import AdminDisputesPage from "./pages/admin/dispute";
 
 function App() {
 	return (
@@ -37,6 +39,14 @@ function App() {
 			<Route
 				path="/posts/create"
 				element={<CreatePostPage />}
+			/>
+			<Route
+				path="/admin/dashboard"
+				element={<AdminDashboard />}
+			/>
+			<Route
+				path="/admin/disputes"
+				element={<AdminDisputesPage />}
 			/>
 		</Routes>
 	);

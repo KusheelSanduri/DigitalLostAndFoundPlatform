@@ -19,12 +19,10 @@ import {
   Eye,
   CheckCircle,
   Clock,
-  AlertTriangle,
   Flag,
   MessageSquare,
   Calendar,
   User,
-  Shield,
   ArrowLeft,
 } from "lucide-react"
 import {Link} from "react-router-dom"
@@ -42,7 +40,7 @@ const mockDisputes = [
       "This person is claiming to have found my phone but is asking for money before returning it. This seems like a scam.",
     evidence: "Screenshots of conversation",
     status: "pending",
-    priority: "high",
+    // priority: "high",
     assignedTo: "Admin Team",
     chatMessages: 12,
     postType: "lost",
@@ -58,7 +56,7 @@ const mockDisputes = [
     description: "The person is being rude and using inappropriate language in the chat.",
     evidence: "Chat logs available",
     status: "under_review",
-    priority: "medium",
+    // priority: "medium",
     assignedTo: "Moderator 1",
     chatMessages: 8,
     postType: "found",
@@ -75,7 +73,7 @@ const mockDisputes = [
       "This post appears to be fake. The description doesn't match the image and seems to be copied from another website.",
     evidence: "Reverse image search results",
     status: "resolved",
-    priority: "low",
+    // priority: "low",
     assignedTo: "Moderator 2",
     chatMessages: 3,
     postType: "lost",
@@ -93,7 +91,7 @@ const mockDisputes = [
     description: "User is asking for personal information before returning the wallet, which seems suspicious.",
     evidence: "Chat conversation screenshots",
     status: "escalated",
-    priority: "high",
+    // priority: "high",
     assignedTo: "Senior Admin",
     chatMessages: 15,
     postType: "found",
@@ -105,7 +103,7 @@ export default function AdminDisputesPage() {
   const [disputes, setDisputes] = useState(mockDisputes)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [priorityFilter, setPriorityFilter] = useState("all")
+  // const [priorityFilter, setPriorityFilter] = useState("all")
   const [selectedDispute, setSelectedDispute] = useState<(typeof mockDisputes)[0] | null>(null)
 
   const filteredDisputes = disputes.filter((dispute) => {
@@ -114,9 +112,7 @@ export default function AdminDisputesPage() {
       dispute.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       dispute.reason.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesStatus = statusFilter === "all" || dispute.status === statusFilter
-    const matchesPriority = priorityFilter === "all" || dispute.priority === priorityFilter
-
-    return matchesSearch && matchesStatus && matchesPriority
+    return matchesSearch && matchesStatus
   })
 
   const getStatusBadge = (status: string) => {
@@ -129,14 +125,7 @@ export default function AdminDisputesPage() {
     return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
   }
 
-  const getPriorityBadge = (priority: string) => {
-    const priorityConfig = {
-      low: { variant: "outline" as const, label: "Low", color: "text-green-600" },
-      medium: { variant: "secondary" as const, label: "Medium", color: "text-yellow-600" },
-      high: { variant: "destructive" as const, label: "High", color: "text-red-600" },
-    }
-    return priorityConfig[priority as keyof typeof priorityConfig] || priorityConfig.medium
-  }
+  // const getPriorityBadge = (priority: string) => {}
 
   const handleStatusChange = (disputeId: string, newStatus: string) => {
     setDisputes((prev:any) =>
@@ -167,7 +156,7 @@ export default function AdminDisputesPage() {
     pending: disputes.filter((d) => d.status === "pending").length,
     underReview: disputes.filter((d) => d.status === "under_review").length,
     resolved: disputes.filter((d) => d.status === "resolved").length,
-    highPriority: disputes.filter((d) => d.priority === "high").length,
+    // highPriority: disputes.filter((d) => d.priority === "high").length,
   }
 
   return (
@@ -182,7 +171,6 @@ export default function AdminDisputesPage() {
             </Link>
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-primary" />
               <h1 className="text-xl font-bold">Dispute Management</h1>
             </div>
           </div>
@@ -197,7 +185,7 @@ export default function AdminDisputesPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -216,15 +204,7 @@ export default function AdminDisputesPage() {
               <p className="text-2xl font-bold mt-1 text-yellow-600">{stats.pending}</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-blue-600" />
-                <span className="text-sm font-medium">Under Review</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-blue-600">{stats.underReview}</p>
-            </CardContent>
-          </Card>
+          {/* Under Review card removed */}
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -232,15 +212,6 @@ export default function AdminDisputesPage() {
                 <span className="text-sm font-medium">Resolved</span>
               </div>
               <p className="text-2xl font-bold mt-1 text-green-600">{stats.resolved}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-red-600" />
-                <span className="text-sm font-medium">High Priority</span>
-              </div>
-              <p className="text-2xl font-bold mt-1 text-red-600">{stats.highPriority}</p>
             </CardContent>
           </Card>
         </div>
@@ -269,17 +240,6 @@ export default function AdminDisputesPage() {
                 <SelectItem value="escalated">Escalated</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-              <SelectTrigger className="w-[150px] bg-background">
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Priority</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="low">Low</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
 
@@ -293,7 +253,6 @@ export default function AdminDisputesPage() {
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-semibold text-lg">{dispute.id}</h3>
                       <Badge {...getStatusBadge(dispute.status)}>{getStatusBadge(dispute.status).label}</Badge>
-                      <Badge {...getPriorityBadge(dispute.priority)}>{getPriorityBadge(dispute.priority).label}</Badge>
                     </div>
                     <p className="text-muted-foreground mb-1">
                       <strong>Post:</strong> {dispute.postTitle} ({dispute.postType})
@@ -322,18 +281,12 @@ export default function AdminDisputesPage() {
 
                         {selectedDispute && (
                           <div className="space-y-6">
-                            {/* Status and Priority */}
+                            {/* Status */}
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">Status:</span>
                                 <Badge {...getStatusBadge(selectedDispute.status)}>
                                   {getStatusBadge(selectedDispute.status).label}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium">Priority:</span>
-                                <Badge {...getPriorityBadge(selectedDispute.priority)}>
-                                  {getPriorityBadge(selectedDispute.priority).label}
                                 </Badge>
                               </div>
                             </div>
@@ -479,16 +432,15 @@ export default function AdminDisputesPage() {
             </div>
             <h3 className="text-lg font-semibold mb-2">No disputes found</h3>
             <p className="text-muted-foreground mb-4">
-              {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
+              {searchQuery || statusFilter !== "all"
                 ? "Try adjusting your search criteria or filters."
                 : "No disputes have been reported yet."}
             </p>
-            {(searchQuery || statusFilter !== "all" || priorityFilter !== "all") && (
+            {(searchQuery || statusFilter !== "all") && (
               <Button
                 onClick={() => {
                   setSearchQuery("")
                   setStatusFilter("all")
-                  setPriorityFilter("all")
                 }}
               >
                 Clear Filters
