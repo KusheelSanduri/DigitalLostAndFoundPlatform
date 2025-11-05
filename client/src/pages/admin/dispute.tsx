@@ -1,19 +1,23 @@
-"use client"
-
-import { useState } from "react"
-import { Button } from "../../components/ui/button"
-import { Card, CardContent } from "../../components/ui/card"
-import { Input } from "../../components/ui/input"
-import { Badge } from "../../components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
+import { useState } from "react";
+import { Button } from "../../components/ui/button";
+import { Card, CardContent } from "../../components/ui/card";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog"
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../../components/ui/select";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../../components/ui/dialog";
 import {
   Search,
   Eye,
@@ -115,41 +119,50 @@ export default function AdminDisputesPage() {
     return matchesSearch && matchesStatus
   })
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { variant: "secondary" as const, label: "Pending" },
-      under_review: { variant: "default" as const, label: "Under Review" },
-      resolved: { variant: "outline" as const, label: "Resolved" },
-      escalated: { variant: "destructive" as const, label: "Escalated" },
-    }
-    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
-  }
+	const getStatusBadge = (status: string) => {
+		const statusConfig = {
+			pending: { variant: "secondary" as const, label: "Pending" },
+			under_review: {
+				variant: "default" as const,
+				label: "Under Review",
+			},
+			resolved: { variant: "outline" as const, label: "Resolved" },
+			escalated: { variant: "destructive" as const, label: "Escalated" },
+		};
+		return (
+			statusConfig[status as keyof typeof statusConfig] ||
+			statusConfig.pending
+		);
+	};
 
   // const getPriorityBadge = (priority: string) => {}
 
-  const handleStatusChange = (disputeId: string, newStatus: string) => {
-    setDisputes((prev:any) =>
-      prev.map((dispute: any) =>
-        dispute.id === disputeId
-          ? {
-              ...dispute,
-              status: newStatus,
-              resolvedAt: newStatus === "resolved" ? new Date().toISOString() : undefined,
-            }
-          : dispute,
-      ),
-    )
-  }
+	const handleStatusChange = (disputeId: string, newStatus: string) => {
+		setDisputes((prev: any) =>
+			prev.map((dispute: any) =>
+				dispute.id === disputeId
+					? {
+							...dispute,
+							status: newStatus,
+							resolvedAt:
+								newStatus === "resolved"
+									? new Date().toISOString()
+									: undefined,
+					  }
+					: dispute
+			)
+		);
+	};
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
+	const formatDate = (dateString: string) => {
+		return new Date(dateString).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+	};
 
   const stats = {
     total: disputes.length,
@@ -291,139 +304,252 @@ export default function AdminDisputesPage() {
                               </div>
                             </div>
 
-                            {/* Post Information */}
-                            <div className="bg-muted/50 p-4 rounded-lg">
-                              <h4 className="font-medium mb-2">Related Post</h4>
-                              <div className="space-y-1 text-sm">
-                                <p>
-                                  <strong>Title:</strong> {selectedDispute.postTitle}
-                                </p>
-                                <p>
-                                  <strong>Type:</strong> {selectedDispute.postType}
-                                </p>
-                                <p>
-                                  <strong>Category:</strong> {selectedDispute.category}
-                                </p>
-                                <p>
-                                  <strong>Post ID:</strong> {selectedDispute.postId}
-                                </p>
-                              </div>
-                            </div>
+														{/* Post Information */}
+														<div className="bg-muted/50 p-4 rounded-lg">
+															<h4 className="font-medium mb-2">
+																Related Post
+															</h4>
+															<div className="space-y-1 text-sm">
+																<p>
+																	<strong>
+																		Title:
+																	</strong>{" "}
+																	{
+																		selectedDispute.postTitle
+																	}
+																</p>
+																<p>
+																	<strong>
+																		Type:
+																	</strong>{" "}
+																	{
+																		selectedDispute.postType
+																	}
+																</p>
+																<p>
+																	<strong>
+																		Category:
+																	</strong>{" "}
+																	{
+																		selectedDispute.category
+																	}
+																</p>
+																<p>
+																	<strong>
+																		Post ID:
+																	</strong>{" "}
+																	{
+																		selectedDispute.postId
+																	}
+																</p>
+															</div>
+														</div>
 
-                            {/* Dispute Details */}
-                            <div>
-                              <h4 className="font-medium mb-2">Dispute Information</h4>
-                              <div className="space-y-3">
-                                <div>
-                                  <span className="text-sm font-medium">Reason:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.reason}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm font-medium">Description:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.description}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm font-medium">Evidence:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.evidence}</p>
-                                </div>
-                              </div>
-                            </div>
+														{/* Dispute Details */}
+														<div>
+															<h4 className="font-medium mb-2">
+																Dispute
+																Information
+															</h4>
+															<div className="space-y-3">
+																<div>
+																	<span className="text-sm font-medium">
+																		Reason:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.reason
+																		}
+																	</p>
+																</div>
+																<div>
+																	<span className="text-sm font-medium">
+																		Description:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.description
+																		}
+																	</p>
+																</div>
+																<div>
+																	<span className="text-sm font-medium">
+																		Evidence:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.evidence
+																		}
+																	</p>
+																</div>
+															</div>
+														</div>
 
-                            {/* Timeline */}
-                            <div>
-                              <h4 className="font-medium mb-2">Timeline</h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4" />
-                                  <span>Reported: {formatDate(selectedDispute.reportedAt)}</span>
-                                </div>
-                                {selectedDispute.resolvedAt && (
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
-                                    <span>Resolved: {formatDate(selectedDispute.resolvedAt)}</span>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  <User className="w-4 h-4" />
-                                  <span>Assigned to: {selectedDispute.assignedTo}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <MessageSquare className="w-4 h-4" />
-                                  <span>Chat messages: {selectedDispute.chatMessages}</span>
-                                </div>
-                              </div>
-                            </div>
+														{/* Timeline */}
+														<div>
+															<h4 className="font-medium mb-2">
+																Timeline
+															</h4>
+															<div className="space-y-2 text-sm">
+																<div className="flex items-center gap-2">
+																	<Calendar className="w-4 h-4" />
+																	<span>
+																		Reported:{" "}
+																		{formatDate(
+																			selectedDispute.reportedAt
+																		)}
+																	</span>
+																</div>
+																{selectedDispute.resolvedAt && (
+																	<div className="flex items-center gap-2">
+																		<CheckCircle className="w-4 h-4 text-green-600" />
+																		<span>
+																			Resolved:{" "}
+																			{formatDate(
+																				selectedDispute.resolvedAt
+																			)}
+																		</span>
+																	</div>
+																)}
+																<div className="flex items-center gap-2">
+																	<User className="w-4 h-4" />
+																	<span>
+																		Assigned
+																		to:{" "}
+																		{
+																			selectedDispute.assignedTo
+																		}
+																	</span>
+																</div>
+																<div className="flex items-center gap-2">
+																	<MessageSquare className="w-4 h-4" />
+																	<span>
+																		Chat
+																		messages:{" "}
+																		{
+																			selectedDispute.chatMessages
+																		}
+																	</span>
+																</div>
+															</div>
+														</div>
 
-                            {selectedDispute.resolution && (
-                              <div className="bg-green-50 p-4 rounded-lg">
-                                <h4 className="font-medium mb-2 text-green-800">Resolution</h4>
-                                <p className="text-sm text-green-700">{selectedDispute.resolution}</p>
-                              </div>
-                            )}
+														{selectedDispute.resolution && (
+															<div className="bg-green-50 p-4 rounded-lg">
+																<h4 className="font-medium mb-2 text-green-800">
+																	Resolution
+																</h4>
+																<p className="text-sm text-green-700">
+																	{
+																		selectedDispute.resolution
+																	}
+																</p>
+															</div>
+														)}
 
-                            {/* Actions */}
-                            <div className="flex gap-2 pt-4 border-t">
-                              <Select
-                                value={selectedDispute.status}
-                                onValueChange={(value) => handleStatusChange(selectedDispute.id, value)}
-                              >
-                                <SelectTrigger className="w-[150px]">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="pending">Pending</SelectItem>
-                                  <SelectItem value="under_review">Under Review</SelectItem>
-                                  <SelectItem value="resolved">Resolved</SelectItem>
-                                  <SelectItem value="escalated">Escalated</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Button variant="outline" size="sm">
-                                View Chat
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                View Post
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                  </div>
-                </div>
+														{/* Actions */}
+														<div className="flex gap-2 pt-4 border-t">
+															<Select
+																value={
+																	selectedDispute.status
+																}
+																onValueChange={(
+																	value
+																) =>
+																	handleStatusChange(
+																		selectedDispute.id,
+																		value
+																	)
+																}
+															>
+																<SelectTrigger className="w-[150px]">
+																	<SelectValue />
+																</SelectTrigger>
+																<SelectContent>
+																	<SelectItem value="pending">
+																		Pending
+																	</SelectItem>
+																	<SelectItem value="under_review">
+																		Under
+																		Review
+																	</SelectItem>
+																	<SelectItem value="resolved">
+																		Resolved
+																	</SelectItem>
+																	<SelectItem value="escalated">
+																		Escalated
+																	</SelectItem>
+																</SelectContent>
+															</Select>
+															<Button
+																variant="outline"
+																size="sm"
+															>
+																View Chat
+															</Button>
+															<Button
+																variant="outline"
+																size="sm"
+															>
+																View Post
+															</Button>
+														</div>
+													</div>
+												)}
+											</DialogContent>
+										</Dialog>
+									</div>
+								</div>
 
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {formatDate(dispute.reportedAt)}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      {dispute.assignedTo}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MessageSquare className="w-4 h-4" />
-                      {dispute.chatMessages} messages
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Select value={dispute.status} onValueChange={(value) => handleStatusChange(dispute.id, value)}>
-                      <SelectTrigger className="w-[130px] h-8">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="under_review">Under Review</SelectItem>
-                        <SelectItem value="resolved">Resolved</SelectItem>
-                        <SelectItem value="escalated">Escalated</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+								<div className="flex items-center justify-between text-sm text-muted-foreground">
+									<div className="flex items-center gap-4">
+										<div className="flex items-center gap-1">
+											<Calendar className="w-4 h-4" />
+											{formatDate(dispute.reportedAt)}
+										</div>
+										<div className="flex items-center gap-1">
+											<User className="w-4 h-4" />
+											{dispute.assignedTo}
+										</div>
+										<div className="flex items-center gap-1">
+											<MessageSquare className="w-4 h-4" />
+											{dispute.chatMessages} messages
+										</div>
+									</div>
+									<div className="flex items-center gap-2">
+										<Select
+											value={dispute.status}
+											onValueChange={(value) =>
+												handleStatusChange(
+													dispute.id,
+													value
+												)
+											}
+										>
+											<SelectTrigger className="w-[130px] h-8">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="pending">
+													Pending
+												</SelectItem>
+												<SelectItem value="under_review">
+													Under Review
+												</SelectItem>
+												<SelectItem value="resolved">
+													Resolved
+												</SelectItem>
+												<SelectItem value="escalated">
+													Escalated
+												</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+								</div>
+							</CardContent>
+						</Card>
+					))}
+				</div>
 
         {filteredDisputes.length === 0 && (
           <div className="text-center py-12">
