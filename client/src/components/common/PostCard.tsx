@@ -14,7 +14,8 @@
 
 import { MapPin, Calendar, MessageCircle } from "lucide-react";
 import { Badge } from "../ui/badge";
-import {
+import
+{
 	Card,
 	CardHeader,
 	CardTitle,
@@ -22,7 +23,7 @@ import {
 	CardContent,
 } from "../ui/card";
 import { Button } from "../ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export type PostCardProps = {
 	post: {
@@ -35,10 +36,12 @@ export type PostCardProps = {
 		type: "lost" | "found";
 		ownerId: string;
 		createdAt: string;
+		status: "claimed" | "unclaimed"
 	};
 };
 
-export function PostCard({ post }: PostCardProps) {
+export function PostCard ( { post }: PostCardProps )
+{
 	const {
 		_id,
 		title,
@@ -51,27 +54,35 @@ export function PostCard({ post }: PostCardProps) {
 		createdAt,
 	} = post;
 
+	const navigate = useNavigate()
+
 	const imageUrl =
 		"https://m.media-amazon.com/images/I/71qa1cXgV6L._AC_UF1000,1000_QL80_.jpg";
 
-	const status: "claimed" | "unclaimed" = "unclaimed"; // Placeholder for post status
+	const status: "claimed" | "unclaimed" = "claimed"; // Placeholder for post status
+
+	const handleClickComment = () =>
+	{
+		navigate( `/chat/${ _id }` )
+	}
+
 	return (
 		<Card
-			key={_id}
-			className={`hover:shadow-lg transition-shadow py-0`}
+			key={ _id }
+			className={ `hover:shadow-lg transition-shadow py-0` }
 		>
 			<>
 				<div className="relative">
 					<img
-						src={imageUrl}
-						alt={title}
+						src={ imageUrl }
+						alt={ title }
 						className="w-full h-48 object-cover rounded-t-lg"
 					/>
 					<Badge
-						variant={type === "lost" ? "destructive" : "default"}
+						variant={ type === "lost" ? "destructive" : "default" }
 						className="absolute top-2 left-2"
 					>
-						{type === "lost" ? "Lost" : "Found"}
+						{ type === "lost" ? "Lost" : "Found" }
 					</Badge>
 
 					{
@@ -80,42 +91,42 @@ export function PostCard({ post }: PostCardProps) {
 							variant="outline"
 							className="absolute top-2 right-2 bg-background"
 						>
-							Claimed
+							{ status }
 						</Badge>
 					}
 				</div>
 				<CardHeader className="pb-2">
 					<CardTitle className="text-lg line-clamp-1">
-						{title}
+						{ title }
 					</CardTitle>
 					<CardDescription className="line-clamp-2">
-						{description}
+						{ description }
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="pt-0">
 					<div className="space-y-2 mb-4">
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
 							<MapPin className="w-3 h-3" />
-							{location}
+							{ location }
 						</div>
 						<div className="flex items-center gap-2 text-sm text-muted-foreground">
 							<Calendar className="w-3 h-3" />
-							{new Date(date).toLocaleDateString()}
+							{ new Date( date ).toLocaleDateString() }
 						</div>
 					</div>
 					<div className="flex items-center justify-between pb-6">
 						<div className="flex items-center gap-4 text-sm text-muted-foreground">
-							<Link to={`/comments/${_id}`}>
-								<Button
-									size="sm"
-									variant="outline"
-									className="p-1"
-								>
-									<MessageCircle className="w-4 h-4" />
-									Comments
-								</Button>
-							</Link>
-							{/* <div className="flex items-center gap-1 border-2 px-2 py-1 rounded-md border-muted-foreground cursor-pointer"></div> */}
+							<Button
+								size="sm"
+								variant="outline"
+								className="p-1"
+								onClick={ handleClickComment }
+								disabled={ status != "claimed" ? true : false }
+							>
+								<MessageCircle className="w-4 h-4" />
+								Comments
+							</Button>
+							{/* <div className="flex items-center gap-1 border-2 px-2 py-1 rounded-md border-muted-foreground cursor-pointer"></div> */ }
 						</div>
 					</div>
 				</CardContent>
