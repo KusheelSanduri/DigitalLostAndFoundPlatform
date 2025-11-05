@@ -10,6 +10,7 @@
 //         "ownerId": "69068860283630366475ef7c",
 //         "createdAt": "2025-11-02T07:29:53.747Z",
 //         "__v": 0
+//         // priority: "high|medium|low" (removed)
 //     }
 
 import { MapPin, Calendar, MessageCircle } from "lucide-react";
@@ -48,10 +49,7 @@ export function PostCard ( { post }: PostCardProps )
 		description,
 		location,
 		date,
-		keywords,
 		type,
-		ownerId,
-		createdAt,
 	} = post;
 
 	const navigate = useNavigate()

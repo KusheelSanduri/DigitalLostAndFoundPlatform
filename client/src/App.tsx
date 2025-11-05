@@ -6,6 +6,8 @@ import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
 import { ResendVerificationLinkPage } from "./pages/auth/ResendVerificationLinkPage";
 import AllPostsPage from "./pages/posts/AllPostsPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
+import AdminDashboard from "./pages/admin/page";
+import AdminDisputesPage from "./pages/admin/dispute";
 import { VerifyEmailPage } from "./pages/auth/VerifyEmailPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import PostChatPage from "./pages/posts/PostChatPage";
@@ -83,6 +85,14 @@ function App() {
 			<Route
 				path="/chat/:postId"
 				element={<PostChatPage />}
+			/>
+			<Route
+				path="/admin/dashboard"
+				element={<AdminDashboard />}
+			/>
+			<Route
+				path="/admin/disputes"
+				element={<AdminDisputesPage />}
 			/>
 		</Routes>
 	);
