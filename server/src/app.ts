@@ -5,6 +5,7 @@ import { AuthRequest, requireAuth } from "./middleware/AuthMiddleware";
 import { AuthController } from "./controllers/AuthController";
 import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
+import DisputeRoutes from "./routes/DisputeRoutes";
 
 const app = express();
 app.use(
@@ -16,7 +17,9 @@ app.use(
 app.use(express.json());
 
 app.use("/api/auth", AuthRouter);
+
 app.use("/api/posts", requireAuth, PostRouter);
+app.use("/api/disputes", requireAuth, DisputeRoutes);
 
 app.get("/api/me", requireAuth, (req: AuthRequest, res) => {
 	AuthController.me(req, res);
