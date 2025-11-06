@@ -3,7 +3,6 @@ import { UserService } from "../services/UserService";
 import { TokenService } from "../services/TokenService";
 import { NodeMailerEmailService } from "../services/NodeMailerEmailService";
 import { AuthRequest } from "../middleware/AuthMiddleware";
-import { User } from "../models/User";
 import { envConfig } from "../config/envConfig";
 
 export class AuthController {

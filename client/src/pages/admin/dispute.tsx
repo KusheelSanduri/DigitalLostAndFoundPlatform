@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
@@ -7,13 +5,20 @@ import { Input } from "../../components/ui/input"
 import { Badge } from "../../components/ui/badge"
 import { Checkbox } from "../../components/ui/checkbox"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog"
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "../../components/ui/select";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "../../components/ui/dialog";
 import {
   Search,
   Eye,
@@ -28,8 +33,6 @@ import {
 import {Link} from "react-router-dom"
 
 import { disputeApi } from "../../api/disputeApi"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-
 
 export default function AdminDisputesPage() {
   const [disputes, setDisputes] = useState<any[]>([])
@@ -80,15 +83,15 @@ export default function AdminDisputesPage() {
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  }
+	const formatDate = (dateString: string) => {
+		return new Date(dateString).toLocaleDateString("en-US", {
+			year: "numeric",
+			month: "short",
+			day: "numeric",
+			hour: "2-digit",
+			minute: "2-digit",
+		});
+	};
 
   const stats = {
     total: disputes.length,
@@ -247,49 +250,94 @@ export default function AdminDisputesPage() {
                               </div>
                             </div>
 
-                            {/* Dispute Details */}
-                            <div>
-                              <h4 className="font-medium mb-2">Dispute Information</h4>
-                              <div className="space-y-3">
-                                <div>
-                                  <span className="text-sm font-medium">Reason:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.reason}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm font-medium">Description:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.description}</p>
-                                </div>
-                                <div>
-                                  <span className="text-sm font-medium">Evidence:</span>
-                                  <p className="text-sm mt-1">{selectedDispute.evidence}</p>
-                                </div>
-                              </div>
-                            </div>
+														{/* Dispute Details */}
+														<div>
+															<h4 className="font-medium mb-2">
+																Dispute
+																Information
+															</h4>
+															<div className="space-y-3">
+																<div>
+																	<span className="text-sm font-medium">
+																		Reason:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.reason
+																		}
+																	</p>
+																</div>
+																<div>
+																	<span className="text-sm font-medium">
+																		Description:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.description
+																		}
+																	</p>
+																</div>
+																<div>
+																	<span className="text-sm font-medium">
+																		Evidence:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.evidence
+																		}
+																	</p>
+																</div>
+															</div>
+														</div>
 
-                            {/* Timeline */}
-                            <div>
-                              <h4 className="font-medium mb-2">Timeline</h4>
-                              <div className="space-y-2 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4" />
-                                  <span>Reported: {formatDate(selectedDispute.reportedAt)}</span>
-                                </div>
-                                {selectedDispute.resolvedAt && (
-                                  <div className="flex items-center gap-2">
-                                    <CheckCircle className="w-4 h-4 text-green-600" />
-                                    <span>Resolved: {formatDate(selectedDispute.resolvedAt)}</span>
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-2">
-                                  <User className="w-4 h-4" />
-                                  <span>Assigned to: {selectedDispute.assignedTo}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <MessageSquare className="w-4 h-4" />
-                                  <span>Chat messages: {selectedDispute.chatMessages}</span>
-                                </div>
-                              </div>
-                            </div>
+														{/* Timeline */}
+														<div>
+															<h4 className="font-medium mb-2">
+																Timeline
+															</h4>
+															<div className="space-y-2 text-sm">
+																<div className="flex items-center gap-2">
+																	<Calendar className="w-4 h-4" />
+																	<span>
+																		Reported:{" "}
+																		{formatDate(
+																			selectedDispute.reportedAt
+																		)}
+																	</span>
+																</div>
+																{selectedDispute.resolvedAt && (
+																	<div className="flex items-center gap-2">
+																		<CheckCircle className="w-4 h-4 text-green-600" />
+																		<span>
+																			Resolved:{" "}
+																			{formatDate(
+																				selectedDispute.resolvedAt
+																			)}
+																		</span>
+																	</div>
+																)}
+																<div className="flex items-center gap-2">
+																	<User className="w-4 h-4" />
+																	<span>
+																		Assigned
+																		to:{" "}
+																		{
+																			selectedDispute.assignedTo
+																		}
+																	</span>
+																</div>
+																<div className="flex items-center gap-2">
+																	<MessageSquare className="w-4 h-4" />
+																	<span>
+																		Chat
+																		messages:{" "}
+																		{
+																			selectedDispute.chatMessages
+																		}
+																	</span>
+																</div>
+															</div>
+														</div>
 
                             {selectedDispute.resolution && (
                               <div className="bg-green-50 p-4 rounded-lg">

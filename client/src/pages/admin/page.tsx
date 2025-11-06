@@ -1,8 +1,12 @@
-"use client"
-
-import { Button } from "../../components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
+import { Button } from "../../components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
 import {
   Flag,
   Users,
@@ -16,17 +20,17 @@ import {
 import {Link} from "react-router-dom"
 
 export default function AdminDashboard() {
-  // Mock stats data
-  const stats = {
-    totalUsers: 1247,
-    activePosts: 89,
-    totalDisputes: 12,
-    pendingDisputes: 5,
-    resolvedDisputes: 7,
-    postsToday: 15,
-    usersToday: 23,
-    disputesToday: 2,
-  }
+	// Mock stats data
+	const stats = {
+		totalUsers: 1247,
+		activePosts: 89,
+		totalDisputes: 12,
+		pendingDisputes: 5,
+		resolvedDisputes: 7,
+		postsToday: 15,
+		usersToday: 23,
+		disputesToday: 2,
+	};
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,75 +49,99 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        {/* Welcome Section */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold mb-2">Welcome back, Admin</h2>
-          <p className="text-muted-foreground">
-            Manage the NITC Lost & Found platform, monitor disputes, and oversee community activities.
-          </p>
-        </div>
+			<div className="container mx-auto px-4 py-8">
+				{/* Welcome Section */}
+				<div className="mb-8">
+					<h2 className="text-3xl font-bold mb-2">
+						Welcome back, Admin
+					</h2>
+					<p className="text-muted-foreground">
+						Manage the NITC Lost & Found platform, monitor disputes,
+						and oversee community activities.
+					</p>
+				</div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Users</p>
-                  <p className="text-2xl font-bold">{stats.totalUsers}</p>
-                  <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                    <TrendingUp className="w-3 h-3" />+{stats.usersToday} today
-                  </p>
-                </div>
-                <Users className="w-8 h-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+				{/* Quick Stats */}
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+					<Card>
+						<CardContent className="p-6">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">
+										Total Users
+									</p>
+									<p className="text-2xl font-bold">
+										{stats.totalUsers}
+									</p>
+									<p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+										<TrendingUp className="w-3 h-3" />+
+										{stats.usersToday} today
+									</p>
+								</div>
+								<Users className="w-8 h-8 text-primary" />
+							</div>
+						</CardContent>
+					</Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Posts</p>
-                  <p className="text-2xl font-bold">{stats.activePosts}</p>
-                  <p className="text-xs text-green-600 flex items-center gap-1 mt-1">
-                    <TrendingUp className="w-3 h-3" />+{stats.postsToday} today
-                  </p>
-                </div>
-                <FileText className="w-8 h-8 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+					<Card>
+						<CardContent className="p-6">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">
+										Active Posts
+									</p>
+									<p className="text-2xl font-bold">
+										{stats.activePosts}
+									</p>
+									<p className="text-xs text-green-600 flex items-center gap-1 mt-1">
+										<TrendingUp className="w-3 h-3" />+
+										{stats.postsToday} today
+									</p>
+								</div>
+								<FileText className="w-8 h-8 text-primary" />
+							</div>
+						</CardContent>
+					</Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Disputes</p>
-                  <p className="text-2xl font-bold">{stats.totalDisputes}</p>
-                  <p className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
-                    <AlertTriangle className="w-3 h-3" />+{stats.disputesToday} today
-                  </p>
-                </div>
-                <Flag className="w-8 h-8 text-destructive" />
-              </div>
-            </CardContent>
-          </Card>
+					<Card>
+						<CardContent className="p-6">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">
+										Total Disputes
+									</p>
+									<p className="text-2xl font-bold">
+										{stats.totalDisputes}
+									</p>
+									<p className="text-xs text-yellow-600 flex items-center gap-1 mt-1">
+										<AlertTriangle className="w-3 h-3" />+
+										{stats.disputesToday} today
+									</p>
+								</div>
+								<Flag className="w-8 h-8 text-destructive" />
+							</div>
+						</CardContent>
+					</Card>
 
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Pending Disputes</p>
-                  <p className="text-2xl font-bold text-yellow-600">{stats.pendingDisputes}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{stats.resolvedDisputes} resolved</p>
-                </div>
-                <Clock className="w-8 h-8 text-yellow-600" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+					<Card>
+						<CardContent className="p-6">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm font-medium text-muted-foreground">
+										Pending Disputes
+									</p>
+									<p className="text-2xl font-bold text-yellow-600">
+										{stats.pendingDisputes}
+									</p>
+									<p className="text-xs text-muted-foreground mt-1">
+										{stats.resolvedDisputes} resolved
+									</p>
+								</div>
+								<Clock className="w-8 h-8 text-yellow-600" />
+							</div>
+						</CardContent>
+					</Card>
+				</div>
 
         {/* Quick Actions */}
         <div className="mb-8">

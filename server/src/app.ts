@@ -6,6 +6,7 @@ import { AuthController } from "./controllers/AuthController";
 import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
 import DisputeRoutes from "./routes/DisputeRoutes";
+import chatRouter from "../src/routes/chat";
 
 const app = express();
 app.use(
@@ -17,7 +18,7 @@ app.use(
 app.use(express.json());
 
 app.use("/api/auth", AuthRouter);
-
+app.use("/api/chat", chatRouter);
 app.use("/api/posts", requireAuth, PostRouter);
 app.use("/api/disputes", requireAuth, DisputeRoutes);
 
