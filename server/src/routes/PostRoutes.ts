@@ -4,6 +4,10 @@ import { PostController } from "../controllers/PostController";
 
 const router = Router(); // router.use(rateLimit);
 
+router.get("/categories", PostController.getCategories);
+
+router.get("/locations", PostController.getLocations);
+
 /**
  * Get all posts
  * @route GET /posts
@@ -21,10 +25,5 @@ router.post("/", PostController.createPost);
  * Restricted to post owner or admin
  */
 router.delete("/:postId", PostController.deletePost);
-
-
-router.get("/categories", PostController.getCategories);
-
-router.get("/locations", PostController.getLocations);
 
 export { router as PostRouter };

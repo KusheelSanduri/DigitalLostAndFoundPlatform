@@ -1,4 +1,5 @@
 export const categories: string[] = [
+	"Any",
 	"ID / Cards / Credentials",
 	"Money and Wallets",
 	"Electronics",
@@ -11,5 +12,5 @@ export const categories: string[] = [
 	"Art, Music, and Design Equipment",
 	"Tools and Technical Equipment",
 	"Transportation and Mobility",
-	"Miscellaneous/Unclassified",
+	"Miscellaneous / Unclassified",
 ];
