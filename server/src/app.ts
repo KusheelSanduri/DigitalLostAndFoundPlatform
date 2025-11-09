@@ -6,6 +6,7 @@ import { AuthController } from "./controllers/AuthController";
 import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
 import chatRouter from "../src/routes/chat";
+import { errorHandler } from "./middleware/ErrorHandler";
 
 const app = express();
 app.use(
@@ -20,8 +21,10 @@ app.use("/api/auth", AuthRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/posts", requireAuth, PostRouter);
 
-app.get("/api/me", requireAuth, (req: AuthRequest, res) => {
+app.get("/api/auth/me", requireAuth, (req: AuthRequest, res) => {
 	AuthController.me(req, res);
 });
+
+app.use(errorHandler);
 
 export default app;
