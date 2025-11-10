@@ -2,21 +2,28 @@ import axiosClient from "./axiosClient";
 
 export const postsApi = {
 	create: (
-		tile: string,
+		title: string,
 		description: string,
 		location: string,
+		category: string,
 		date: Date,
 		type: string,
-		keywords: string[]
-	) =>
-		axiosClient.post("/api/posts", {
-			tile,
-			description,
-			location,
-			date,
-			type,
-			keywords,
-		}),
+		keywords: string,
+		image: File | null
+	) => {
+		const formData = new FormData();
+		formData.append("title", title);
+		formData.append("description", description);
+		formData.append("location", location);
+		formData.append("category", category);
+		formData.append("date", date.toISOString());
+		formData.append("type", type);
+		formData.append("keywords", keywords);
+
+		if (image) formData.append("image", image);
+
+		return axiosClient.post("/api/posts", formData, {headers: {"Content-Type": "multipart/form-data"}});
+	},
 
 	getPosts: (page: number, sq?: string, cat?: string, loc?: string) => {
 		let endpointURL = `/api/posts/${page}`;
@@ -40,6 +47,7 @@ export const postsApi = {
 	},
 
 	deletePost: (postId: string) => axiosClient.delete(`/api/posts/${postId}`),
+	markClaimedPost: (postId: string) => axiosClient.patch(`/api/posts/claimed/${postId}`),
 
 	getCategories: () => axiosClient.get("/api/posts/categories"),
 

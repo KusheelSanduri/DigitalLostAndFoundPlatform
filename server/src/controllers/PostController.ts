@@ -13,20 +13,36 @@ export class PostController {
 		res: Response
 	): Promise<void> {
 		try {
-			const { title, description, location, date, type } = req.body;
+			const { title, description, location, date, type, category } =
+				req.body;
 
-			if (!title || !description || !location || !date || !type) {
+			if (
+				!title ||
+				!description ||
+				!location ||
+				!date ||
+				!type ||
+				!category
+			) {
 				res.status(400).json({ message: "Missing fields." });
 				return;
 			}
+
+			console.log("Getting imageURL");
+
+			const imageUrl = (req as any).file?.path ?? "null";
+
+			console.log(imageUrl);
 
 			const post = new Post({
 				title,
 				description,
 				location,
+				category,
 				date,
 				type,
 				ownerId: req.user?.id,
+				imageUrl,
 			});
 
 			await post.save();
@@ -68,7 +84,7 @@ export class PostController {
 				];
 			}
 			if (categoryFilter && categoryFilter !== "Any") {
-				filter.type = categoryFilter;
+				filter.category = categoryFilter;
 			}
 			if (locationFilter && locationFilter !== "Any") {
 				filter.location = locationFilter;
@@ -78,6 +94,7 @@ export class PostController {
 			const totalPages = Math.ceil(totalPosts / limit);
 
 			const posts = await Post.find(filter)
+				.lean()
 				.sort({ createdAt: -1 })
 				.skip(skip)
 				.limit(limit);
@@ -129,6 +146,41 @@ export class PostController {
 			);
 		} catch (error) {
 			throw PostError.PostDeletionFailed(error);
+		}
+	}
+
+	public static async markClaimed(
+		req: AuthRequest,
+		res: Response
+	): Promise<void> {
+		try {
+			const { postId } = req.params;
+			const post = await Post.findById(postId);
+
+			if (!post) {
+				throw PostError.PostNotFound();
+			}
+
+			if (
+				post.ownerId.toString() !== req.user?.id &&
+				req.user?.role !== "admin"
+			) {
+				throw AuthError.Unauthorized();
+			}
+
+			await Post.findByIdAndUpdate(post._id, {
+				$set: { status: "claimed" },
+			});
+
+			res.status(200).json(
+				new SuccessResponse(
+					"Posts updated successfully.",
+					undefined,
+					200
+				)
+			);
+		} catch (error) {
+			throw PostError.PostMarkClaimedFailed(error);
 		}
 	}
 

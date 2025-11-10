@@ -1,79 +1,69 @@
 import type React from "react";
-import { useState } from "react";
-import { Button } from "../../components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Textarea } from "../../components/ui/textarea";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "../../components/ui/select";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Search, ArrowLeft, Upload, X } from "lucide-react";
-import { Link } from "react-router-dom";
+import {useEffect, useState} from "react";
+import {Button} from "../../components/ui/button";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../components/ui/card";
+import {Input} from "../../components/ui/input";
+import {Label} from "../../components/ui/label";
+import {Textarea} from "../../components/ui/textarea";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "../../components/ui/select";
+import {Alert, AlertDescription} from "../../components/ui/alert";
+import {Upload, X} from "lucide-react";
+import {Link} from "react-router-dom";
+import {postsApi} from "../../api/postsApi";
+import {toast} from "sonner";
+import {Navbar} from "../../components/common/Navbar";
 
 export default function CreatePostPage() {
 	const [postType, setPostType] = useState<"lost" | "found" | "">("");
 	const [formData, setFormData] = useState({
 		title: "",
 		description: "",
+		keywords: "",
 		category: "",
 		location: "",
-		date: "",
+		date: new Date(Date.now()),
 		contactInfo: "",
 	});
-	const [images, setImages] = useState<string[]>([]);
+	const [image, setImage] = useState<File | null>(null);
 	const [error, setError] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 
-	const categories = [
-		"Electronics",
-		"Personal Items",
-		"Books",
-		"Keys",
-		"Clothing",
-		"Documents",
-		"Sports Equipment",
-		"Other",
-	];
-	const locations = [
-		"Central Library",
-		"Basketball Court",
-		"Mechanical Department",
-		"Main Gate",
-		"CSE Department",
-		"Cafeteria",
-		"Hostel",
-		"Academic Block",
-		"Other",
-	];
+	// Categories and location state
+	const [categories, setCategories] = useState<string[]>([]);
+	const [locations, setLocations] = useState<string[]>([]);
+
+	const fetchOnMount = async () => {
+		await postsApi.getLocations().then((locRes) => {
+			console.log("Fetched locations:", locRes.data.data.locations);
+			setLocations(locRes.data.data.locations);
+		});
+
+		await postsApi.getCategories().then((catRes) => {
+			console.log("Fetched categories:", catRes.data.data.categories);
+			setCategories(catRes.data.data.categories);
+		});
+	};
+
+	// Fetch categories, locations from API when component mounts
+	useEffect(() => {
+		fetchOnMount();
+	}, []);
 
 	const handleInputChange = (field: string, value: string) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
+		setFormData((prev) => ({...prev, [field]: value}));
 	};
 
-	const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = e.target.files;
-		if (files) {
-			const newImages = Array.from(files).map((file) =>
-				URL.createObjectURL(file)
-			);
-			setImages((prev) => [...prev, ...newImages].slice(0, 3)); // Max 3 images
-		}
+	const handleDateChange = (value: string) => {
+		setFormData((prev) => ({...prev, date: new Date(value)}));
 	};
 
-	const removeImage = (index: number) => {
-		setImages((prev) => prev.filter((_, i) => i !== index));
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) setImage(file);
+	};
+
+	const removeImage = () => {
+		setImage(null);
 	};
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -122,9 +112,20 @@ export default function CreatePostPage() {
 		try {
 			await new Promise((resolve) => setTimeout(resolve, 1500));
 			// Redirect to posts page
-			window.location.href = "/posts?message=Post created successfully";
+			await postsApi.create(
+				formData.title,
+				formData.description,
+				formData.location,
+				formData.category,
+				formData.date,
+				postType == "found" ? "found" : "lost",
+				formData.keywords,
+				image
+			);
+			toast.success("Post created successfully");
+			// window.location.href = "/posts?message=Post created successfully";
 		} catch {
-			setError("Failed to create post. Please try again.");
+			toast.error("Failed to create post. Please try again.");
 		} finally {
 			setIsLoading(false);
 		}
@@ -133,50 +134,21 @@ export default function CreatePostPage() {
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header */}
-			<header className="border-b border-border bg-card/50 backdrop-blur-sm">
-				<div className="container mx-auto px-4 py-4 flex items-center justify-between">
-					<Link
-						to="/posts"
-						className="flex items-center gap-2"
-					>
-						<ArrowLeft className="w-4 h-4" />
-						<span className="font-medium">Back to Posts</span>
-					</Link>
-					<Link
-						to="/"
-						className="flex items-center gap-2"
-					>
-						<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-							<Search className="w-4 h-4 text-primary-foreground" />
-						</div>
-						<span className="font-bold text-xl text-foreground">
-							NITC Lost & Found
-						</span>
-					</Link>
-				</div>
-			</header>
+			<Navbar />
 
 			<div className="container mx-auto px-4 py-8 max-w-2xl">
 				<div className="text-center mb-8">
 					<h1 className="text-3xl font-bold mb-2">Report an Item</h1>
-					<p className="text-muted-foreground">
-						Help the NITC community by reporting lost or found items
-					</p>
+					<p className="text-muted-foreground">Help the NITC community by reporting lost or found items</p>
 				</div>
 
 				<Card>
 					<CardHeader>
 						<CardTitle>Create New Post</CardTitle>
-						<CardDescription>
-							Provide detailed information to help others identify
-							the item
-						</CardDescription>
+						<CardDescription>Provide detailed information to help others identify the item</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<form
-							onSubmit={handleSubmit}
-							className="space-y-6"
-						>
+						<form onSubmit={handleSubmit} className="space-y-6">
 							{error && (
 								<Alert variant="destructive">
 									<AlertDescription>{error}</AlertDescription>
@@ -189,11 +161,7 @@ export default function CreatePostPage() {
 								<div className="flex gap-4">
 									<Button
 										type="button"
-										variant={
-											postType === "lost"
-												? "default"
-												: "outline"
-										}
+										variant={postType === "lost" ? "default" : "outline"}
 										onClick={() => setPostType("lost")}
 										className="flex-1"
 									>
@@ -201,11 +169,7 @@ export default function CreatePostPage() {
 									</Button>
 									<Button
 										type="button"
-										variant={
-											postType === "found"
-												? "default"
-												: "outline"
-										}
+										variant={postType === "found" ? "default" : "outline"}
 										onClick={() => setPostType("found")}
 										className="flex-1"
 									>
@@ -219,25 +183,15 @@ export default function CreatePostPage() {
 									{/* Title */}
 									<div className="space-y-2">
 										<Label htmlFor="title">
-											Title{" "}
-											<span className="text-destructive">
-												*
-											</span>
+											Title <span className="text-destructive">*</span>
 										</Label>
 										<Input
 											id="title"
 											placeholder={`e.g., ${
-												postType === "lost"
-													? "Lost iPhone 14 Pro"
-													: "Found Water Bottle"
+												postType === "lost" ? "Lost Water bottle" : "Found Water Bottle"
 											}`}
 											value={formData.title}
-											onChange={(e) =>
-												handleInputChange(
-													"title",
-													e.target.value
-												)
-											}
+											onChange={(e) => handleInputChange("title", e.target.value)}
 											className="bg-background"
 										/>
 									</div>
@@ -245,22 +199,29 @@ export default function CreatePostPage() {
 									{/* Description */}
 									<div className="space-y-2">
 										<Label htmlFor="description">
-											Description{" "}
-											<span className="text-destructive">
-												*
-											</span>
+											Description <span className="text-destructive">*</span>
 										</Label>
 										<Textarea
 											id="description"
 											placeholder={`Provide detailed description including color, size, brand, distinctive features, etc.`}
 											value={formData.description}
-											onChange={(e) =>
-												handleInputChange(
-													"description",
-													e.target.value
-												)
-											}
+											onChange={(e) => handleInputChange("description", e.target.value)}
 											rows={4}
+											className="bg-background"
+										/>
+									</div>
+
+									{/* Keywords */}
+									<div className="space-y-2">
+										<Label htmlFor="keywords">
+											Add Keywords (Separated with comma, Not case-sensitive){" "}
+											<span className="text-destructive"></span>
+										</Label>
+										<Input
+											id="keywords"
+											placeholder={`bottle, green`}
+											value={formData.keywords}
+											onChange={(e) => handleInputChange("keywords", e.target.value)}
 											className="bg-background"
 										/>
 									</div>
@@ -269,68 +230,42 @@ export default function CreatePostPage() {
 									<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 										<div className="space-y-2">
 											<Label>
-												Category{" "}
-												<span className="text-destructive">
-													*
-												</span>
+												Category <span className="text-destructive">*</span>
 											</Label>
 											<Select
 												value={formData.category}
-												onValueChange={(value) =>
-													handleInputChange(
-														"category",
-														value
-													)
-												}
+												onValueChange={(value) => handleInputChange("category", value)}
 											>
-												<SelectTrigger className="bg-background">
+												<SelectTrigger className="bg-background w-full">
 													<SelectValue placeholder="Select category" />
 												</SelectTrigger>
 												<SelectContent>
-													{categories.map(
-														(category) => (
-															<SelectItem
-																key={category}
-																value={category}
-															>
-																{category}
-															</SelectItem>
-														)
-													)}
+													{categories.map((category) => (
+														<SelectItem key={category} value={category}>
+															{category}
+														</SelectItem>
+													))}
 												</SelectContent>
 											</Select>
 										</div>
 
 										<div className="space-y-2">
 											<Label>
-												Location{" "}
-												<span className="text-destructive">
-													*
-												</span>
+												Location <span className="text-destructive">*</span>
 											</Label>
 											<Select
 												value={formData.location}
-												onValueChange={(value) =>
-													handleInputChange(
-														"location",
-														value
-													)
-												}
+												onValueChange={(value) => handleInputChange("location", value)}
 											>
-												<SelectTrigger className="bg-background">
+												<SelectTrigger className="bg-background w-full">
 													<SelectValue placeholder="Select location" />
 												</SelectTrigger>
 												<SelectContent>
-													{locations.map(
-														(location) => (
-															<SelectItem
-																key={location}
-																value={location}
-															>
-																{location}
-															</SelectItem>
-														)
-													)}
+													{locations.map((location) => (
+														<SelectItem key={location} value={location}>
+															{location}
+														</SelectItem>
+													))}
 												</SelectContent>
 											</Select>
 										</div>
@@ -339,109 +274,59 @@ export default function CreatePostPage() {
 									{/* Date */}
 									<div className="space-y-2">
 										<Label htmlFor="date">
-											Date{" "}
-											{postType === "lost"
-												? "Lost"
-												: "Found"}{" "}
-											<span className="text-destructive">
-												*
-											</span>
+											Date {postType === "lost" ? "Lost" : "Found"}{" "}
+											<span className="text-destructive">*</span>
 										</Label>
 										<Input
 											id="date"
 											type="date"
-											value={formData.date}
-											onChange={(e) =>
-												handleInputChange(
-													"date",
-													e.target.value
-												)
-											}
+											value={formData.date.toISOString().split("T")[0]}
+											onChange={(e) => handleDateChange(e.target.value)}
 											className="bg-background"
 										/>
 									</div>
 
 									{/* Images */}
 									<div className="space-y-3">
-										<Label>Images (Optional)</Label>
-										<div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
-											<input
-												type="file"
-												accept="image/*"
-												multiple
-												onChange={handleImageUpload}
-												className="hidden"
-												id="image-upload"
-											/>
-											<label
-												htmlFor="image-upload"
-												className="cursor-pointer"
-											>
-												<Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-												<p className="text-sm text-muted-foreground">
-													Click to upload images (Max
-													3)
-												</p>
-											</label>
-										</div>
+										{image == null && (
+											<>
+												<Label>Image (Optional)</Label>
+												<div className="border-2 border-dashed border-border rounded-lg p-6 text-center">
+													<input
+														type="file"
+														accept="image/*"
+														onChange={handleImageChange}
+														className="hidden"
+														id="image-upload"
+													/>
+													<label htmlFor="image-upload" className="cursor-pointer">
+														<Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
+														<p className="text-sm text-muted-foreground">
+															Click to upload image. (Max 1 image)
+														</p>
+													</label>
+												</div>
+											</>
+										)}
 
-										{images.length > 0 && (
-											<div className="grid grid-cols-3 gap-4">
-												{images.map((image, index) => (
-													<div
-														key={index}
-														className="relative"
-													>
-														<img
-															src={
-																image ||
-																"/placeholder.svg"
-															}
-															alt={`Upload ${
-																index + 1
-															}`}
-															className="w-full h-24 object-cover rounded-lg"
-														/>
-														<Button
-															type="button"
-															variant="destructive"
-															size="sm"
-															className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0"
-															onClick={() =>
-																removeImage(
-																	index
-																)
-															}
-														>
-															<X className="w-3 h-3" />
-														</Button>
-													</div>
-												))}
+										{image != null && (
+											<div className="relative">
+												<img
+													src={URL.createObjectURL(image) || "/placeholder.svg"}
+													alt={`Uploaded Image`}
+													className="w-24 h-24 object-cover rounded-sm"
+												/>
+												<Button
+													type="button"
+													variant="destructive"
+													size="sm"
+													className="absolute -top-2 -left-2 w-6 h-6 rounded-full p-0"
+													onClick={() => removeImage()}
+												>
+													<X className="w-3 h-3" />
+												</Button>
 											</div>
 										)}
-									</div>
-
-									{/* Contact Information */}
-									<div className="space-y-2">
-										<Label htmlFor="contactInfo">
-											Additional Contact Info (Optional)
-										</Label>
-										<Input
-											id="contactInfo"
-											placeholder="Phone number, room number, etc."
-											value={formData.contactInfo}
-											onChange={(e) =>
-												handleInputChange(
-													"contactInfo",
-													e.target.value
-												)
-											}
-											className="bg-background"
-										/>
-										<p className="text-xs text-muted-foreground">
-											Your NITC email will be used as the
-											primary contact method
-										</p>
 									</div>
 
 									{/* Submit Button */}
@@ -454,14 +339,8 @@ export default function CreatePostPage() {
 										>
 											<Link to="/posts">Cancel</Link>
 										</Button>
-										<Button
-											type="submit"
-											disabled={isLoading}
-											className="flex-1"
-										>
-											{isLoading
-												? "Creating Post..."
-												: "Create Post"}
+										<Button type="submit" disabled={isLoading} className="flex-1">
+											{isLoading ? "Creating Post..." : "Create Post"}
 										</Button>
 									</div>
 								</>
@@ -473,35 +352,24 @@ export default function CreatePostPage() {
 				{/* Tips */}
 				<Card className="mt-6">
 					<CardHeader>
-						<CardTitle className="text-lg">
-							Tips for Better Results
-						</CardTitle>
+						<CardTitle className="text-lg">Tips for Better Results</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						<div className="flex items-start gap-3">
 							<div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-							<p className="text-sm">
-								Be as specific as possible in your description
-							</p>
+							<p className="text-sm">Be as specific as possible in your description</p>
 						</div>
 						<div className="flex items-start gap-3">
 							<div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-							<p className="text-sm">
-								Include distinctive features, colors, and brands
-							</p>
+							<p className="text-sm">Include distinctive features, colors, and brands</p>
 						</div>
 						<div className="flex items-start gap-3">
 							<div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-							<p className="text-sm">
-								Upload clear photos if available
-							</p>
+							<p className="text-sm">Upload clear photos if available</p>
 						</div>
 						<div className="flex items-start gap-3">
 							<div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
-							<p className="text-sm">
-								Specify the exact location and time when
-								possible
-							</p>
+							<p className="text-sm">Specify the exact location and time when possible</p>
 						</div>
 					</CardContent>
 				</Card>

@@ -16,6 +16,7 @@ import {
 import {useAuth} from "../../auth/useAuth";
 import {useNavigate} from "react-router-dom";
 import {postsApi} from "../../api/postsApi";
+import {toast} from "sonner";
 
 export default function AllPostsPage() {
 	const {user} = useAuth();
@@ -45,20 +46,18 @@ export default function AllPostsPage() {
 
 	const fetchOnMount = async () => {
 		await postsApi.getPosts(1).then((response) => {
-			console.log("Fetched posts:", response.data.posts);
-			setPosts(response.data.posts);
-			setCurrentPage(response.data.currentPage);
-			setTotalPages(response.data.totalPages);
+			console.log("Fetched posts:", response.data.data.posts);
+			setPosts(response.data.data.posts);
+			setCurrentPage(response.data.data.currentPage);
+			setTotalPages(response.data.data.totalPages);
 		});
 
 		await postsApi.getLocations().then((locRes) => {
-			console.log("Fetched locations:", locRes.data);
-			setLocations(locRes.data);
+			setLocations(locRes.data.data.locations);
 		});
 
 		await postsApi.getCategories().then((catRes) => {
-			console.log("Fetched categories:", catRes.data);
-			setCategories(catRes.data);
+			setCategories(catRes.data.data.categories);
 		});
 	};
 
@@ -69,12 +68,40 @@ export default function AllPostsPage() {
 
 	useEffect(() => {
 		postsApi.getPosts(currentPage, searchQuery, selectedCategory, selectedLocation).then((response) => {
-			console.log("Fetched posts with query:", response.data.posts);
-			setPosts(response.data.posts);
-			setCurrentPage(response.data.currentPage);
-			setTotalPages(response.data.totalPages);
+			console.log("Fetched posts with query:", response.data.data.posts);
+			setPosts(response.data.data.posts);
+			setCurrentPage(response.data.data.currentPage);
+			setTotalPages(response.data.data.totalPages);
 		});
 	}, [searchQuery, currentPage, selectedCategory, selectedLocation]);
+
+	const handleDeletePost = async (id: string) => {
+		try {
+			await postsApi.deletePost(id);
+			toast.success("Post Deleted.");
+			postsApi.getPosts(currentPage, searchQuery, selectedCategory, selectedLocation).then((response) => {
+				setPosts(response.data.data.posts);
+				setCurrentPage(response.data.data.currentPage);
+				setTotalPages(response.data.data.totalPages);
+			});
+		} catch {
+			toast.error("Post Deletion Failed. Something went wrong.");
+		}
+	};
+
+	const handleMarkClaimedPost = async (id: string) => {
+		try {
+			await postsApi.markClaimedPost(id);
+			toast.success("Post marked as claimed.");
+			postsApi.getPosts(currentPage, searchQuery, selectedCategory, selectedLocation).then((response) => {
+				setPosts(response.data.data.posts);
+				setCurrentPage(response.data.data.currentPage);
+				setTotalPages(response.data.data.totalPages);
+			});
+		} catch {
+			toast.error("Post marking as claimed Failed. Something went wrong.");
+		}
+	};
 
 	return (
 		<div className="min-h-screen bg-background">
@@ -124,7 +151,12 @@ export default function AllPostsPage() {
 				{/* Posts Grid/List */}
 				<div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
 					{posts.map((post) => (
-						<PostCard key={post._id} post={post} />
+						<PostCard
+							key={post._id}
+							post={post}
+							deleteFn={handleDeletePost}
+							markClaimedFn={handleMarkClaimedPost}
+						/>
 					))}
 				</div>
 
@@ -140,8 +172,8 @@ export default function AllPostsPage() {
 						<Button
 							onClick={() => {
 								setSearchQuery("");
-								setSelectedCategory("all");
-								setSelectedLocation("all");
+								setSelectedCategory("Any");
+								setSelectedLocation("Any");
 								setCurrentPage(1);
 							}}
 						>

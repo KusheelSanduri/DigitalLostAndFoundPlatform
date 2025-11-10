@@ -47,4 +47,13 @@ export class PostError extends AppError {
 			details
 		);
 	}
+
+	static PostMarkClaimedFailed(details?: any) {
+		return new PostError(
+			"Posts marking as claimed Failed. Something went wrong on our side.",
+			500,
+			ErrorCodes.INTERNAL_ERROR,
+			details
+		);
+	}
 }

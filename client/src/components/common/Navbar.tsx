@@ -1,10 +1,10 @@
-import { Search } from "lucide-react";
-import { Link } from "react-router-dom";
-import { Button } from "../ui/button";
-import { useAuth } from "../../auth/useAuth";
+import {Search} from "lucide-react";
+import {Link} from "react-router-dom";
+import {Button} from "../ui/button";
+import {useAuth} from "../../auth/useAuth";
 
 export function Navbar() {
-	const { user, logout } = useAuth();
+	const {user, logout} = useAuth();
 
 	return (
 		<header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50 h-[70px]">
@@ -13,27 +13,16 @@ export function Navbar() {
 					<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
 						<Search className="w-4 h-4 text-primary-foreground" />
 					</div>
-					<span className="font-bold text-xl text-foreground">
-						NITC Lost & Found
-					</span>
+					<span className="font-bold text-xl text-foreground">Lost & Found</span>
 				</div>
 				<nav className="hidden md:flex items-center gap-6">
-					<Link
-						to="/posts"
-						className="text-muted-foreground hover:text-foreground transition-colors"
-					>
+					<Link to="/posts" className="text-muted-foreground hover:text-foreground transition-colors">
 						Posts
 					</Link>
-					<Link
-						to="/about"
-						className="text-muted-foreground hover:text-foreground transition-colors"
-					>
+					<Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
 						About
 					</Link>
-					<Link
-						to="/contact"
-						className="text-muted-foreground hover:text-foreground transition-colors"
-					>
+					<Link to="/contact" className="text-muted-foreground hover:text-foreground transition-colors">
 						Contact
 					</Link>
 				</nav>
@@ -49,13 +38,10 @@ export function Navbar() {
 						</>
 					) : (
 						<>
-							<Link to="/posts">
-								<Button>Go to Posts</Button>
+							<Link to="/posts/create">
+								<Button>Report an Item</Button>
 							</Link>
-							<Button
-								variant="ghost"
-								onClick={() => logout()}
-							>
+							<Button variant="ghost" onClick={() => logout()}>
 								Logout
 							</Button>
 						</>
