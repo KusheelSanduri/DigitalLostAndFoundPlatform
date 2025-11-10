@@ -14,8 +14,17 @@ export const errorHandler = (
 	let errorCode = err.errorCode || "SERVER_ERROR";
 	let details = err.details || null;
 
+	if (process.env.NODE_ENV === "development") {
+		console.error("🔥 Error:", err);
+	}
+
 	if (err instanceof AppError) {
-		console.log("Error is being handled: ", err.name, err.message);
+		console.log(
+			"Error is being handled: ",
+			err.name,
+			err.message,
+			err.details
+		);
 
 		const errorResponse = new ErrorResponse(
 			message,
@@ -25,10 +34,6 @@ export const errorHandler = (
 		);
 		res.status(statusCode).json(errorResponse);
 		return;
-	}
-
-	if (process.env.NODE_ENV === "development") {
-		console.error("🔥 Unhandled Error:", err);
 	}
 
 	const genericError = new ErrorResponse(
