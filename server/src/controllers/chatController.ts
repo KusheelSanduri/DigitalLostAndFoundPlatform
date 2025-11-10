@@ -1,37 +1,53 @@
 import { Request, Response } from "express";
 import { getStorageService } from "../services/storageFactory";
+import { ChatRoom, Message } from "../models";
 
-export const createMessage = async (req: Request, res: Response) => {
-  const { roomId } = req.params;
-  const { senderId, senderName, text } = req.body;
-  if (!text || !senderName) {
-    return res.status(400).json({ error: "Missing senderName or text" });
-  }
 
+export const createMessage = async (req:Request, res:Response) => {
   try {
-    const storage = getStorageService();
-    const message = await storage.createMessage(
-      roomId,
+    const { roomId } = req.params; 
+    const { senderName, text, senderId } = req.body;
+
+    if (!text || !senderName) {
+      return res.status(400).json({ success: false, message: "Missing text or senderName" });
+    }
+
+    let room = await ChatRoom.findOne({ itemId: roomId });
+    if (!room) {
+      room = await ChatRoom.create({ itemId: roomId });
+    }
+
+    const message = await Message.create({
+      roomId: room._id, 
       senderId,
       senderName,
-      text
-    );
-    return res.status(201).json(message);
+      text,
+    });
+
+    return res.status(201).json({ success: true, message });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error saving message:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
-export const getMessages = async (req: Request, res: Response) => {
-  const { roomId } = req.params;
+export const getMessages = async (req:Request, res:Response) => {
   try {
-    const storage = getStorageService();
-    const messages = await storage.getMessages(roomId, 100);
+    const { roomId } = req.params; // postId
+
+    const room = await ChatRoom.findOne({ itemId: roomId });
+    if (!room) {
+      return res.status(404).json({ success: false, message: "Room not found" });
+    }
+
+    const messages = await Message.find({ roomId: room._id })
+      .sort({ createdAt: 1 }) 
+      .lean();
+
     return res.json(messages);
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error fetching messages:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -47,15 +63,19 @@ export const createRoom = async (req: Request, res: Response) => {
   }
 };
 
-export const getRoomByItem = async (req: Request, res: Response) => {
-  const { itemId } = req.params;
+
+export const getRoomByItem = async (req:Request, res:Response) => {
   try {
-    const storage = getStorageService();
-    const room = await storage.getRoomByItemId(itemId);
-    if (!room) return res.status(404).json({ error: "Room not found" });
-    return res.json(room);
+    const { itemId } = req.params;
+    const room = await ChatRoom.findOne({ itemId });
+
+    if (!room) {
+      return res.status(404).json({ success: false, message: "Room not found" });
+    }
+
+    return res.json({ success: true, room });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "Server error" });
+    console.error("Error getting room:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 };

@@ -45,7 +45,7 @@ export default function PostChatPage() {
     }, [postId]);
 
     const fetchMessages = async () => {
-        if (!text.trim() || !postId) return;
+        if ( !postId) return;
 
         try {
             const data = await api.getMessages(postId);
