@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { Button } from "../../components/ui/button";
-import { Card, CardContent } from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { Badge } from "../../components/ui/badge";
+import { useState, useEffect } from "react"
+import { Button } from "../../components/ui/button"
+import { Card, CardContent } from "../../components/ui/card"
+import { Input } from "../../components/ui/input"
+import { Badge } from "../../components/ui/badge"
+import { Checkbox } from "../../components/ui/checkbox"
 import {
 	Select,
 	SelectContent,
@@ -31,128 +32,56 @@ import {
 } from "lucide-react"
 import {Link} from "react-router-dom"
 
-// Mock dispute data
-const mockDisputes = [
-  {
-    id: "DSP-001",
-    postId: "1",
-    postTitle: "Lost iPhone 14 Pro",
-    reportedBy: "Anonymous User",
-    reportedAt: "2024-01-16T14:30:00Z",
-    reason: "Fraudulent claim",
-    description:
-      "This person is claiming to have found my phone but is asking for money before returning it. This seems like a scam.",
-    evidence: "Screenshots of conversation",
-    status: "pending",
-    // priority: "high",
-    assignedTo: "Admin Team",
-    chatMessages: 12,
-    postType: "lost",
-    category: "Electronics",
-  },
-  {
-    id: "DSP-002",
-    postId: "3",
-    postTitle: "Found Water Bottle",
-    reportedBy: "Anonymous User",
-    reportedAt: "2024-01-16T11:15:00Z",
-    reason: "Inappropriate behavior",
-    description: "The person is being rude and using inappropriate language in the chat.",
-    evidence: "Chat logs available",
-    status: "under_review",
-    // priority: "medium",
-    assignedTo: "Moderator 1",
-    chatMessages: 8,
-    postType: "found",
-    category: "Personal Items",
-  },
-  {
-    id: "DSP-003",
-    postId: "5",
-    postTitle: "Lost Textbook",
-    reportedBy: "Anonymous User",
-    reportedAt: "2024-01-15T16:45:00Z",
-    reason: "Spam or fake post",
-    description:
-      "This post appears to be fake. The description doesn't match the image and seems to be copied from another website.",
-    evidence: "Reverse image search results",
-    status: "resolved",
-    // priority: "low",
-    assignedTo: "Moderator 2",
-    chatMessages: 3,
-    postType: "lost",
-    category: "Books",
-    resolution: "Post removed and user warned",
-    resolvedAt: "2024-01-16T09:30:00Z",
-  },
-  {
-    id: "DSP-004",
-    postId: "2",
-    postTitle: "Found Wallet",
-    reportedBy: "Anonymous User",
-    reportedAt: "2024-01-15T13:20:00Z",
-    reason: "Scam attempt",
-    description: "User is asking for personal information before returning the wallet, which seems suspicious.",
-    evidence: "Chat conversation screenshots",
-    status: "escalated",
-    // priority: "high",
-    assignedTo: "Senior Admin",
-    chatMessages: 15,
-    postType: "found",
-    category: "Personal Items",
-  },
-]
+import { disputeApi } from "../../api/disputeApi"
 
 export default function AdminDisputesPage() {
-  const [disputes, setDisputes] = useState(mockDisputes)
+  const [disputes, setDisputes] = useState<any[]>([])
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  // const [priorityFilter, setPriorityFilter] = useState("all")
-  const [selectedDispute, setSelectedDispute] = useState<(typeof mockDisputes)[0] | null>(null)
+  const [selectedDispute, setSelectedDispute] = useState<any | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    disputeApi.getAll()
+      .then(res => setDisputes(res.data))
+      .finally(() => setLoading(false))
+  }, [])
 
   const filteredDisputes = disputes.filter((dispute) => {
     const matchesSearch =
-      dispute.postTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dispute.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      dispute.reason.toLowerCase().includes(searchQuery.toLowerCase())
+      (dispute.postTitle?.toLowerCase().includes(searchQuery.toLowerCase()) || "") ||
+      (dispute._id?.toLowerCase().includes(searchQuery.toLowerCase()) || "") ||
+      (dispute.reason?.toLowerCase().includes(searchQuery.toLowerCase()) || "")
     const matchesStatus = statusFilter === "all" || dispute.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
-	const getStatusBadge = (status: string) => {
-		const statusConfig = {
-			pending: { variant: "secondary" as const, label: "Pending" },
-			under_review: {
-				variant: "default" as const,
-				label: "Under Review",
-			},
-			resolved: { variant: "outline" as const, label: "Resolved" },
-			escalated: { variant: "destructive" as const, label: "Escalated" },
-		};
-		return (
-			statusConfig[status as keyof typeof statusConfig] ||
-			statusConfig.pending
-		);
-	};
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { variant: "secondary" as const, label: "Pending" },
+      resolved: { variant: "outline" as const, label: "Resolved", className: "bg-green-100 text-green-700 border-green-400" },
+    }
+    return statusConfig[status as keyof typeof statusConfig] || statusConfig.pending
+  }
 
   // const getPriorityBadge = (priority: string) => {}
 
-	const handleStatusChange = (disputeId: string, newStatus: string) => {
-		setDisputes((prev: any) =>
-			prev.map((dispute: any) =>
-				dispute.id === disputeId
-					? {
-							...dispute,
-							status: newStatus,
-							resolvedAt:
-								newStatus === "resolved"
-									? new Date().toISOString()
-									: undefined,
-					  }
-					: dispute
-			)
-		);
-	};
+  const handleStatusChange = async (disputeId: string, checked: boolean) => {
+    const newStatus = checked ? "resolved" : "pending"
+    try {
+      await disputeApi.updateStatus(disputeId, newStatus)
+      setDisputes((prev: any) =>
+        prev.map((dispute: any) =>
+          (dispute._id === disputeId || dispute.id === disputeId)
+            ? { ...dispute, status: newStatus, resolvedAt: checked ? new Date().toISOString() : undefined }
+            : dispute
+        )
+      )
+    } catch (e) {
+      // handle error
+    }
+  }
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString("en-US", {
@@ -167,9 +96,7 @@ export default function AdminDisputesPage() {
   const stats = {
     total: disputes.length,
     pending: disputes.filter((d) => d.status === "pending").length,
-    underReview: disputes.filter((d) => d.status === "under_review").length,
     resolved: disputes.filter((d) => d.status === "resolved").length,
-    // highPriority: disputes.filter((d) => d.priority === "high").length,
   }
 
   return (
@@ -178,7 +105,7 @@ export default function AdminDisputesPage() {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/admin" className="flex items-center gap-2">
+            <Link to="/admin/dashboard" className="flex items-center gap-2">
               <ArrowLeft className="w-4 h-4" />
               <span className="font-medium">Admin Dashboard</span>
             </Link>
@@ -198,7 +125,7 @@ export default function AdminDisputesPage() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Stats Cards */}
-  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center gap-2">
@@ -248,9 +175,7 @@ export default function AdminDisputesPage() {
               <SelectContent>
                 <SelectItem value="all">All Status</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="under_review">Under Review</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
-                <SelectItem value="escalated">Escalated</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -258,17 +183,19 @@ export default function AdminDisputesPage() {
 
         {/* Disputes List */}
         <div className="space-y-4">
-          {filteredDisputes.map((dispute) => (
-            <Card key={dispute.id} className="hover:shadow-md transition-shadow">
+          {loading ? (
+            <div className="text-center py-8">Loading disputes...</div>
+          ) : filteredDisputes.map((dispute) => (
+            <Card key={dispute._id || dispute.id} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg">{dispute.id}</h3>
-                      <Badge {...getStatusBadge(dispute.status)}>{getStatusBadge(dispute.status).label}</Badge>
+                      <h3 className="font-semibold text-lg">{dispute._id || dispute.id}</h3>
+                      <Badge {...getStatusBadge(dispute.status)} className={dispute.status === "resolved" ? "bg-green-100 text-green-700 border-green-400" : ""}>{getStatusBadge(dispute.status).label}</Badge>
                     </div>
                     <p className="text-muted-foreground mb-1">
-                      <strong>Post:</strong> {dispute.postTitle} ({dispute.postType})
+                      <strong>Post:</strong> {dispute.postTitle || dispute.itemId?.title} ({dispute.postType})
                     </p>
                     <p className="text-muted-foreground mb-1">
                       <strong>Reason:</strong> {dispute.reason}
@@ -287,7 +214,7 @@ export default function AdminDisputesPage() {
                         <DialogHeader>
                           <DialogTitle className="flex items-center gap-2">
                             <Flag className="w-5 h-5" />
-                            Dispute Details - {dispute.id}
+                            Dispute Details - {dispute._id || dispute.id}
                           </DialogTitle>
                           <DialogDescription>Review and manage this dispute report</DialogDescription>
                         </DialogHeader>
@@ -298,52 +225,30 @@ export default function AdminDisputesPage() {
                             <div className="flex items-center gap-4">
                               <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">Status:</span>
-                                <Badge {...getStatusBadge(selectedDispute.status)}>
+                                <Badge {...getStatusBadge(selectedDispute.status)} className={selectedDispute.status === "resolved" ? "bg-green-100 text-green-700 border-green-400" : ""}>
                                   {getStatusBadge(selectedDispute.status).label}
                                 </Badge>
                               </div>
                             </div>
 
-														{/* Post Information */}
-														<div className="bg-muted/50 p-4 rounded-lg">
-															<h4 className="font-medium mb-2">
-																Related Post
-															</h4>
-															<div className="space-y-1 text-sm">
-																<p>
-																	<strong>
-																		Title:
-																	</strong>{" "}
-																	{
-																		selectedDispute.postTitle
-																	}
-																</p>
-																<p>
-																	<strong>
-																		Type:
-																	</strong>{" "}
-																	{
-																		selectedDispute.postType
-																	}
-																</p>
-																<p>
-																	<strong>
-																		Category:
-																	</strong>{" "}
-																	{
-																		selectedDispute.category
-																	}
-																</p>
-																<p>
-																	<strong>
-																		Post ID:
-																	</strong>{" "}
-																	{
-																		selectedDispute.postId
-																	}
-																</p>
-															</div>
-														</div>
+                            {/* Post Information */}
+                            <div className="bg-muted/50 p-4 rounded-lg">
+                              <h4 className="font-medium mb-2">Related Post</h4>
+                              <div className="space-y-1 text-sm">
+                                <p>
+                                  <strong>Title:</strong> {selectedDispute.postTitle || selectedDispute.itemId?.title}
+                                </p>
+                                <p>
+                                  <strong>Type:</strong> {selectedDispute.postType}
+                                </p>
+                                <p>
+                                  <strong>Category:</strong> {selectedDispute.category}
+                                </p>
+                                <p>
+                                  <strong>Post ID:</strong> {selectedDispute.postId || selectedDispute.itemId?._id}
+                                </p>
+                              </div>
+                            </div>
 
 														{/* Dispute Details */}
 														<div>
@@ -434,122 +339,47 @@ export default function AdminDisputesPage() {
 															</div>
 														</div>
 
-														{selectedDispute.resolution && (
-															<div className="bg-green-50 p-4 rounded-lg">
-																<h4 className="font-medium mb-2 text-green-800">
-																	Resolution
-																</h4>
-																<p className="text-sm text-green-700">
-																	{
-																		selectedDispute.resolution
-																	}
-																</p>
-															</div>
-														)}
+                            {selectedDispute.resolution && (
+                              <div className="bg-green-50 p-4 rounded-lg">
+                                <h4 className="font-medium mb-2 text-green-800">Resolution</h4>
+                                <p className="text-sm text-green-700">{selectedDispute.resolution}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </div>
 
-														{/* Actions */}
-														<div className="flex gap-2 pt-4 border-t">
-															<Select
-																value={
-																	selectedDispute.status
-																}
-																onValueChange={(
-																	value
-																) =>
-																	handleStatusChange(
-																		selectedDispute.id,
-																		value
-																	)
-																}
-															>
-																<SelectTrigger className="w-[150px]">
-																	<SelectValue />
-																</SelectTrigger>
-																<SelectContent>
-																	<SelectItem value="pending">
-																		Pending
-																	</SelectItem>
-																	<SelectItem value="under_review">
-																		Under
-																		Review
-																	</SelectItem>
-																	<SelectItem value="resolved">
-																		Resolved
-																	</SelectItem>
-																	<SelectItem value="escalated">
-																		Escalated
-																	</SelectItem>
-																</SelectContent>
-															</Select>
-															<Button
-																variant="outline"
-																size="sm"
-															>
-																View Chat
-															</Button>
-															<Button
-																variant="outline"
-																size="sm"
-															>
-																View Post
-															</Button>
-														</div>
-													</div>
-												)}
-											</DialogContent>
-										</Dialog>
-									</div>
-								</div>
-
-								<div className="flex items-center justify-between text-sm text-muted-foreground">
-									<div className="flex items-center gap-4">
-										<div className="flex items-center gap-1">
-											<Calendar className="w-4 h-4" />
-											{formatDate(dispute.reportedAt)}
-										</div>
-										<div className="flex items-center gap-1">
-											<User className="w-4 h-4" />
-											{dispute.assignedTo}
-										</div>
-										<div className="flex items-center gap-1">
-											<MessageSquare className="w-4 h-4" />
-											{dispute.chatMessages} messages
-										</div>
-									</div>
-									<div className="flex items-center gap-2">
-										<Select
-											value={dispute.status}
-											onValueChange={(value) =>
-												handleStatusChange(
-													dispute.id,
-													value
-												)
-											}
-										>
-											<SelectTrigger className="w-[130px] h-8">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="pending">
-													Pending
-												</SelectItem>
-												<SelectItem value="under_review">
-													Under Review
-												</SelectItem>
-												<SelectItem value="resolved">
-													Resolved
-												</SelectItem>
-												<SelectItem value="escalated">
-													Escalated
-												</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					))}
-				</div>
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {formatDate(dispute.reportedAt)}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <User className="w-4 h-4" />
+                      {dispute.assignedTo}
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MessageSquare className="w-4 h-4" />
+                      {dispute.chatMessages} messages
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={dispute.status === "resolved"}
+                      onCheckedChange={(checked) => handleStatusChange(dispute._id || dispute.id, !!checked)}
+                      aria-label={dispute.status === "resolved" ? "Resolved" : "Pending"}
+                    />
+                    <span>{dispute.status === "resolved" ? "Resolved" : "Pending"}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
         {filteredDisputes.length === 0 && (
           <div className="text-center py-12">
