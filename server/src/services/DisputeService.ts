@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import DisputeModel, { IDispute } from "../models/dispute";
+import { IDispute, Dispute } from "../models/dispute";
 
 class DisputeService {
   /*Create a new dispute*/
@@ -10,7 +10,7 @@ class DisputeService {
     evidence?: string[]
   ): Promise<IDispute> {
     try {
-      const dispute = new DisputeModel({
+      const dispute = new Dispute({
         userId,
         itemId,
         reason,
@@ -30,7 +30,7 @@ class DisputeService {
   /*Get all disputes filed by a specific user*/
   async getUserDisputes(userId: Types.ObjectId): Promise<IDispute[]> {
     try {
-      return await DisputeModel.find({ userId }).sort({ createdAt: -1 });
+      return await Dispute.find({ userId }).sort({ createdAt: -1 });
     } catch (error) {
       console.error("Error fetching user disputes:", error);
       throw new Error("Failed to fetch user disputes.");
@@ -41,7 +41,7 @@ class DisputeService {
   async getAllDisputes(status?: "pending" | "resolved"): Promise<IDispute[]> {
     try {
       const query = status ? { status } : {};
-      return await DisputeModel.find(query)
+      return await Dispute.find(query)
         .populate("userId", "name email")
         .populate("itemId", "title")
         .sort({ createdAt: -1 });
@@ -58,7 +58,7 @@ class DisputeService {
     adminRemarks?: string
   ): Promise<IDispute | null> {
     try {
-      const dispute = await DisputeModel.findByIdAndUpdate(
+      const dispute = await Dispute.findByIdAndUpdate(
         disputeId,
         {
           $set: {
@@ -82,7 +82,7 @@ class DisputeService {
    */
   async deleteDispute(disputeId: Types.ObjectId): Promise<boolean> {
     try {
-      const result = await DisputeModel.findByIdAndDelete(disputeId);
+      const result = await Dispute.findByIdAndDelete(disputeId);
       return !!result;
     } catch (error) {
       console.error("Error deleting dispute:", error);

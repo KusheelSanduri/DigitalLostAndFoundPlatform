@@ -7,6 +7,7 @@ import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
 import DisputeRoutes from "./routes/DisputeRoutes";
 import chatRouter from "../src/routes/chat";
+import AdminRoutes from "./routes/index";
 
 const app = express();
 app.use(
@@ -20,6 +21,7 @@ app.use(express.json());
 app.use("/api/auth", AuthRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/posts", requireAuth, PostRouter);
+app.use("/api", AdminRoutes);
 app.use("/api/disputes", requireAuth, DisputeRoutes);
 
 app.get("/api/me", requireAuth, (req: AuthRequest, res) => {
