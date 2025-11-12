@@ -1,5 +1,5 @@
 import { Types } from "mongoose";
-import { IDispute, Dispute } from "../models/dispute";
+import { IDispute, Dispute } from "../models/Dispute";
 
 class DisputeService {
   /*Create a new dispute*/
