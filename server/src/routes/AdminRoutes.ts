@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { User } from "../models/User";
 import { Post } from "../models/Post";
-import {Dispute} from "../models/dispute";
+import {Dispute} from "../models/Dispute";
 
 const router = Router();
 
