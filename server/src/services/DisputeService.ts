@@ -2,7 +2,6 @@ import { Types } from "mongoose";
 import { IDispute, Dispute } from "../models/Dispute";
 
 class DisputeService {
-  /*Create a new dispute*/
   async createDispute(
     userId: Types.ObjectId,
     itemId: Types.ObjectId,

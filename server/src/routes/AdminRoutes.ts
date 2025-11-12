@@ -8,43 +8,36 @@ import { AuthError } from "../utils/errors/AuthError";
 const router = Router();
 
 router.get("/stats", async (req: AuthRequest, res: Response) => {
-    try {
+	try {
+		if (req.user?.role !== "admin") {
+			throw AuthError.Unauthorized();
+		}
 
-        if (req.user?.role !== "admin") {
-            throw AuthError.Unauthorized();
-        }
+		const [
+			totalUsers,
+			activePosts,
+			totalDisputes,
+			pendingDisputes,
+			resolvedDisputes,
+		] = await Promise.all([
+			User.countDocuments(),
+			Post.countDocuments(),
+			Dispute.countDocuments(),
+			Dispute.countDocuments({ status: "pending" }),
+			Dispute.countDocuments({ status: "resolved" }),
+		]);
 
-        const totalUsersPromise = User.countDocuments();
-        const activePostsPromise = Post.countDocuments();
-        const totalDisputesPromise = Dispute.countDocuments();
-        const pendingDisputesPromise = Dispute.countDocuments({ status: "pending" });
-        const resolvedDisputesPromise = Dispute.countDocuments({ status: "resolved" });
-
-        const [
-            totalUsers,
-            activePosts,
-            totalDisputes,
-            pendingDisputes,
-            resolvedDisputes,
-        ] = await Promise.all([
-            totalUsersPromise,
-            activePostsPromise,
-            totalDisputesPromise,
-            pendingDisputesPromise,
-            resolvedDisputesPromise,
-        ]);
-
-
-        res.json({
-            totalUsers,
-            activePosts,
-            totalDisputes,
-            pendingDisputes,
-            resolvedDisputes,
-        });
-    } catch (e) {
-        res.status(500).json({ message: "Failed to fetch stats" });
-    }
+		res.json({
+			totalUsers,
+			activePosts,
+			totalDisputes,
+			pendingDisputes,
+			resolvedDisputes,
+		});
+	} catch (e) {
+		console.error(e);
+		res.status(500).json({ message: "Failed to fetch stats" });
+	}
 });
 
 export default router;

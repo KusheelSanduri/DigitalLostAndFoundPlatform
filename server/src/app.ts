@@ -7,7 +7,7 @@ import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
 import DisputeRoutes from "./routes/DisputeRoutes";
 import chatRouter from "../src/routes/chat";
-import AdminRoutes from "./routes/index";
+import AdminRoutes from "./routes/ChatRoutes";
 import { errorHandler } from "./middleware/ErrorHandler";
 
 const app = express();

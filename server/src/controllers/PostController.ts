@@ -101,7 +101,7 @@ export class PostController {
 
 			const resultPosts = posts.map((post) => ({
 				...post,
-				isOwner: post.ownerId.toString() === req.user?.id,
+				isOwner: post.ownerId.toString() === req.user?.id || req.user?.role === "admin",
 			}));
 			// { posts, totalPages, currentPage: page }
 			res.status(200).json(
