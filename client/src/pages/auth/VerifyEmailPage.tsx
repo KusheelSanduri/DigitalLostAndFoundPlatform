@@ -1,21 +1,15 @@
-import { useState } from "react";
-import { Navbar } from "../../components/common/Navbar";
-import { Link, useSearchParams } from "react-router-dom";
-import { Button } from "../../components/ui/button";
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-} from "../../components/ui/card";
-import { authApi } from "../../api/authApi";
+import {useTransition} from "react";
+import {Navbar} from "../../components/common/Navbar";
+import {Link, useSearchParams} from "react-router-dom";
+import {Button} from "../../components/ui/button";
+import {Card, CardHeader, CardTitle, CardDescription, CardContent} from "../../components/ui/card";
+import {authApi} from "../../api/authApi";
 
 export function VerifyEmailPage() {
-	const [isLoading, setIsLoading] = useState(false);
 	const [searchParams] = useSearchParams();
 	const email = searchParams.get("email");
 	const token = searchParams.get("token");
+	const [isPending, startTransition] = useTransition();
 
 	if (!email || !token) {
 		return <div>Invalid verification link.</div>;
@@ -24,14 +18,17 @@ export function VerifyEmailPage() {
 	const verifyEmail = async (e: React.FormEvent) => {
 		try {
 			e.preventDefault();
-			setIsLoading(true);
 			await authApi.verifyEmail(email, token);
 			alert("Email Verified Successfully! You can now log in.");
 		} catch {
 			alert("Email verification failed. Please try again.");
-		} finally {
-			setIsLoading(false);
 		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		startTransition(async () => {
+			await verifyEmail(e);
+		});
 	};
 
 	return (
@@ -43,33 +40,20 @@ export function VerifyEmailPage() {
 						<CardHeader className="text-center">
 							<CardTitle>Forgot Password?</CardTitle>
 							<CardDescription>
-								Enter your NITC email address and we'll send you
-								a reset link
+								Enter your NITC email address and we'll send you a reset link
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<form
-								onSubmit={verifyEmail}
-								className="space-y-4"
-							>
-								<Button
-									type="submit"
-									className="w-full"
-									disabled={isLoading}
-								>
-									{isLoading
-										? "Verifying..."
-										: "Verify Email"}
+							<form onSubmit={handleSubmit} className="space-y-4">
+								<Button type="submit" className="w-full" disabled={isPending}>
+									{isPending ? "Verifying..." : "Verify Email"}
 								</Button>
 							</form>
 
 							<div className="mt-6 text-center">
 								<p className="text-sm text-muted-foreground">
 									Already verified?{" "}
-									<Link
-										to="/login"
-										className="text-primary hover:underline font-medium"
-									>
+									<Link to="/login" className="text-primary hover:underline font-medium">
 										Sign in here
 									</Link>
 								</p>

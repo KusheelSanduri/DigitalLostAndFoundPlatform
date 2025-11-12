@@ -4,6 +4,10 @@ import { TokenService } from "../services/TokenService";
 import { NodeMailerEmailService } from "../services/NodeMailerEmailService";
 import { AuthRequest } from "../middleware/AuthMiddleware";
 import { envConfig } from "../config/envConfig";
+import { SuccessResponse } from "../utils/ApiResponse";
+import { ValidationError } from "../utils/errors/ValidationError";
+import { AuthError } from "../utils/errors/AuthError";
+import mongoose from "mongoose";
 
 export class AuthController {
 	private static ORG_DOMAIN = envConfig.ORGANIZATION_DOMAIN;
@@ -12,30 +16,44 @@ export class AuthController {
 		const { name, email, password } = req.body;
 
 		if (!name || !email || !password) {
-			res.status(400).json({ message: "Missing fields." });
-			return;
+			throw ValidationError.MissingFields(
+				"Name, email, and password are required"
+			);
 		}
 
 		const domain = email.split("@")[1];
 
 		if (AuthController.ORG_DOMAIN && domain !== AuthController.ORG_DOMAIN) {
-			res.status(400).json({ message: "Organization email required" });
-			return;
+			throw AuthError.OrganizationEmailMismatch();
 		}
 
 		if (await UserService.findByEmail(email)) {
-			res.status(400).json({ message: "User already exists" });
-			return;
+			throw AuthError.UserExists();
 		}
 
-		const user = await UserService.createUser(name, email, password);
-		const token = TokenService.generateRandomToken();
-		await UserService.setVerifyToken(user, token);
-		await NodeMailerEmailService.sendVerificationEmail(email, token);
-		res.json({
-			message:
-				"Registered. Check your email and click on the verification link to verify account.",
-		});
+		const session = await mongoose.startSession();
+		session.startTransaction();
+
+		try {
+			const user = await UserService.createUser(name, email, password);
+			const token = TokenService.generateRandomToken();
+			await UserService.setVerifyToken(user, token);
+			await NodeMailerEmailService.sendVerificationEmail(email, token);
+			await session.commitTransaction();
+
+			res.status(201).json(
+				new SuccessResponse(
+					"Registered successful. Check your email to verify account.",
+					undefined,
+					201
+				)
+			);
+		} catch (err) {
+			await session.abortTransaction();
+			throw AuthError.RegistrationUnsuccessful({ error: err });
+		} finally {
+			session.endSession();
+		}
 	}
 
 	public static async resendVerificationLink(
@@ -44,114 +62,182 @@ export class AuthController {
 	): Promise<void> {
 		const { email } = req.body;
 
-		if (!email) {
+		if (
+			!email ||
+			RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(
+				email
+			) == false
+		) {
 			res.status(400).json({ message: "Missing Fields." });
-			return;
+			throw ValidationError.InvalidEmailFormat();
 		}
 
 		const user = await UserService.findByEmail(email);
 
 		if (!user || user.isVerified) {
-			throw new Error("If account exists, verification link sent");
+			res.json(
+				new SuccessResponse(
+					"If account exists, verification link sent",
+					undefined,
+					200
+				)
+			);
+			return;
 		}
-		const token = TokenService.generateRandomToken();
-		await UserService.setVerifyToken(user, token);
-		await NodeMailerEmailService.sendVerificationEmail(email, token);
-		res.json({
-			message: "If account exists, verification link sent",
-		});
+
+		const session = await mongoose.startSession();
+		session.startTransaction();
+
+		try {
+			const token = TokenService.generateRandomToken();
+			await UserService.setVerifyToken(user, token);
+			await NodeMailerEmailService.sendVerificationEmail(email, token);
+
+			res.status(200).json(
+				new SuccessResponse(
+					"If account exists, verification link sent.",
+					undefined,
+					200
+				)
+			);
+		} catch (err) {
+			await session.abortTransaction();
+			throw AuthError.ResendVerificationLinkFailure({ error: err });
+		} finally {
+			session.endSession();
+		}
 	}
 
 	public static async login(req: Request, res: Response): Promise<void> {
 		const { email, password } = req.body;
 
 		if (!email || !password) {
-			res.status(400).json({ message: "Missing fields." });
-			return;
+			throw ValidationError.MissingFields(
+				"Email and password are required."
+			);
 		}
 
 		const user = await UserService.findByEmail(email);
 
 		if (!user) {
-			res.status(400).json({ message: "Invalid credentials" });
-			return;
+			throw AuthError.InvalidCredentials();
 		}
 
 		if (!user.isVerified) {
-			res.status(403).json({
-				message:
-					"Email not verified. Please Verify your email before logging in",
-			});
-			return;
+			throw AuthError.AccountNotVerified();
 		}
-
 		const valid = await UserService.validatePassword(user, password);
+
 		if (!valid) {
-			res.status(400).json({ message: "Invalid credentials" });
-			return;
+			throw AuthError.InvalidCredentials();
 		}
 
 		const token = TokenService.signJwt(user);
-		res.json({ token });
+
+		res.status(200).json(
+			new SuccessResponse("Login Successful.", { token }, 200)
+		);
 	}
 
 	public static async verify(req: Request, res: Response): Promise<void> {
 		const { email, token } = req.query as { email: string; token: string };
+
 		if (!email || !token) {
-			res.status(400).send("Missing email or token");
-			return;
+			throw ValidationError.MissingFields(
+				"Email and token are required."
+			);
 		}
 
 		const user = await UserService.verifyUserEmail(email, token);
 
 		if (!user) {
-			res.status(400).send("Invalid or expired token");
-			return;
+			throw AuthError.InvalidVerificationToken();
 		}
 
-		res.send("Email verified. You can log in now.");
+		res.status(200).json(
+			new SuccessResponse(
+				"Email verification successful.",
+				undefined,
+				200
+			)
+		);
 	}
 
 	public static async forgot(req: Request, res: Response) {
 		const { email } = req.body;
 
 		if (!email) {
-			res.status(400).json({ message: "Email is required" });
-			return;
+			throw ValidationError.MissingFields();
 		}
 
 		const user = await UserService.findByEmail(email);
+
 		if (!user) {
-			res.json({ message: "If account exists, reset link sent" });
+			res.status(200).json(
+				new SuccessResponse(
+					"If account exists, reset password link sent.",
+					undefined,
+					200
+				)
+			);
 			return;
 		}
-		const token = TokenService.generateRandomToken();
-		await UserService.setResetToken(user, token);
-		await NodeMailerEmailService.sendResetEmail(email, token);
-		res.json({ message: "If account exists, reset link sent" });
+
+		const session = await mongoose.startSession();
+		session.startTransaction();
+
+		try {
+			const token = TokenService.generateRandomToken();
+			await UserService.setResetToken(user, token);
+			await NodeMailerEmailService.sendResetEmail(email, token);
+
+			res.status(200).json(
+				new SuccessResponse(
+					"If account exists, reset password link sent.",
+					undefined,
+					200
+				)
+			);
+		} catch (err) {
+			await session.abortTransaction();
+			throw AuthError.ResendVerificationLinkFailure({ error: err });
+		} finally {
+			session.endSession();
+		}
 	}
 
 	public static async reset(req: Request, res: Response) {
 		const { email, token, password } = req.body;
 
 		if (!email || !token || !password) {
-			res.status(400).json({ message: "Missing fields" });
-			return;
+			throw ValidationError.MissingFields();
 		}
 
 		const user = await UserService.resetPassword(email, token, password);
+
 		if (!user) {
-			res.status(400).json({ message: "Invalid or expired token" });
-			return;
+			throw AuthError.InvalidResetToken();
 		}
-		res.json({ message: "Password reset successful" });
+
+		new SuccessResponse(
+			"Password Reset successful. You can now log in with your new password.",
+			undefined,
+			201
+		);
 	}
 
 	public static async me(req: AuthRequest, res: Response): Promise<void> {
 		try {
-			res.json({ id: req.user?.id, email: req.user?.email });
+			const data = {
+				id: req.user?.id,
+				email: req.user?.email,
+				name: "Placeholder name",
+			};
+			res.status(200).json(
+				new SuccessResponse("Profile fetch successful.", data, 200)
+			);
 		} catch (error: any) {
-			res.status(400).json({ message: error.message });
+			throw AuthError.Unauthorized({ error });
 		}
 	}
 }

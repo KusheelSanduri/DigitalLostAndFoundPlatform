@@ -8,6 +8,7 @@ import { PostRouter } from "./routes/PostRoutes";
 import DisputeRoutes from "./routes/DisputeRoutes";
 import chatRouter from "../src/routes/chat";
 import AdminRoutes from "./routes/index";
+import { errorHandler } from "./middleware/ErrorHandler";
 
 const app = express();
 app.use(
@@ -24,8 +25,10 @@ app.use("/api/posts", requireAuth, PostRouter);
 app.use("/api", AdminRoutes);
 app.use("/api/disputes", requireAuth, DisputeRoutes);
 
-app.get("/api/me", requireAuth, (req: AuthRequest, res) => {
+app.get("/api/auth/me", requireAuth, (req: AuthRequest, res) => {
 	AuthController.me(req, res);
 });
+
+app.use(errorHandler);
 
 export default app;

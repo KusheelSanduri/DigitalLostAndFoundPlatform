@@ -1,4 +1,5 @@
 export const locations: string[] = [
+	"Any",
 	"Main Gate",
 	"Administration Block",
 	"Central Library",

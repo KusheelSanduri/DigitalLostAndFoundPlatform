@@ -31,13 +31,26 @@ export const api = {
   },
 
   // Message endpoints
+
   async getMessages(roomId: string) {
-    const response = await fetch(`${API_BASE_URL}/api/chat/${roomId}/messages`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch messages");
+  const response = await fetch(
+    `${API_BASE_URL}/api/chat/${roomId}/messages?ts=${Date.now()}`, 
+    {
+      method: "GET",
+      headers: {
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+      },
     }
-    return response.json();
-  },
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch messages");
+  }
+
+  return response.json();
+},
+
 
   async createMessage(
     roomId: string,

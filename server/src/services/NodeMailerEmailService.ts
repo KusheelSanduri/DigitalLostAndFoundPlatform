@@ -16,11 +16,6 @@ export class NodeMailerEmailService {
 	};
 
 	private static createTransport() {
-		console.log(
-			"Creating transport with config:",
-			NodeMailerEmailService.config
-		);
-
 		return nodemailer.createTransport({
 			host: NodeMailerEmailService.config.host,
 			port: NodeMailerEmailService.config.port || 465,

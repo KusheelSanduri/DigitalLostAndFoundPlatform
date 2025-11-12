@@ -1,41 +1,30 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "../../components/ui/card";
-import { Label } from "@radix-ui/react-label";
-import { EyeOff, Eye } from "lucide-react";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Checkbox } from "../../components/ui/checkbox";
-import { Navbar } from "../../components/common/Navbar";
-import { useAuth } from "../../auth/useAuth";
+import {useEffect, useState, useTransition} from "react";
+import {Link, useNavigate} from "react-router-dom";
+import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "../../components/ui/card";
+import {Label} from "@radix-ui/react-label";
+import {EyeOff, Eye} from "lucide-react";
+import {Button} from "../../components/ui/button";
+import {Input} from "../../components/ui/input";
+import {Checkbox} from "../../components/ui/checkbox";
+import {Navbar} from "../../components/common/Navbar";
+import {useAuth} from "../../auth/useAuth";
+import {toast} from "sonner";
 
 export function RegisterPage() {
-	const { register, user } = useAuth();
+	const navigate = useNavigate();
+	const {register, user} = useAuth();
 	const [showPassword, setShowPassword] = useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+	const [agreedToTerms, setAgreedToTerms] = useState(false);
+	const [isPending, startTransition] = useTransition();
 	const [formData, setFormData] = useState({
 		firstName: "",
 		lastName: "",
 		email: "",
 		password: "",
 		confirmPassword: "",
-		userType: "",
-		rollNumber: "",
-		department: "",
 	});
-	const [error, setError] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
-	const [agreedToTerms, setAgreedToTerms] = useState(false);
-	const navigate = useNavigate();
 
-	// if already logged in, redirect to home
 	useEffect(() => {
 		if (user) {
 			navigate("/posts");
@@ -43,52 +32,50 @@ export function RegisterPage() {
 	}, [navigate, user]);
 
 	const handleInputChange = (field: string, value: string) => {
-		setFormData((prev) => ({ ...prev, [field]: value }));
+		setFormData((prev) => ({...prev, [field]: value}));
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	const submit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setError("");
-		setIsLoading(true);
 
-		// Validation
-		// if (!formData.email.endsWith("@nitc.ac.in")) {
-		// 	setError("Please use your NITC email address (@nitc.ac.in)");
-		// 	setIsLoading(false);
-		// 	return;
-		// }
+		if (!formData.email.endsWith("@nitc.ac.in")) {
+			toast.error("Please use a valid NITC email address");
+			return;
+		}
 
 		if (formData.password !== formData.confirmPassword) {
-			setError("Passwords do not match");
-			setIsLoading(false);
+			toast.error("Passwords do not match");
 			return;
 		}
 
 		if (formData.password.length < 8) {
-			setError("Password must be at least 8 characters long");
-			setIsLoading(false);
+			toast.error("Password must be at least 8 characters long");
 			return;
 		}
 
 		if (!agreedToTerms) {
-			setError("Please agree to the Terms of Service and Privacy Policy");
-			setIsLoading(false);
+			toast.error("You must agree to the Terms of Service and Privacy Policy");
 			return;
 		}
 
-		// Simulate signup process
 		try {
 			await register(
-				formData.firstName + " " + formData.lastName,
+				formData.firstName.trim() + " " + formData.lastName.trim(),
 				formData.email,
 				formData.password
 			);
-			alert("Account created successfully! Please log in.");
-		} catch {
-			setError("Failed to create account. Please try again.");
-		} finally {
-			setIsLoading(false);
+			toast.success("Account created successfully! Please check your mail and verify your email address.");
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		} catch (err: any) {
+			toast.error(err.response.data.message || "Registration failed. Please try again.");
 		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		startTransition(async () => {
+			await submit(e);
+		});
 	};
 
 	return (
@@ -103,15 +90,9 @@ export function RegisterPage() {
 								<div className="mt-2 bg-muted/50 rounded-lg p-4">
 									<div className="flex items-start gap-3">
 										<div>
-											<h4 className="font-medium text-sm mb-1">
-												NITC Community Only
-											</h4>
+											<h4 className="font-medium text-sm mb-1">NITC Community Only</h4>
 											<p className="text-xs text-muted-foreground">
-												This platform is exclusively for
-												NIT Calicut students, faculty,
-												and staff. Please use your
-												official NITC email address to
-												register.
+												Please use your official NITC email address to register.
 											</p>
 										</div>
 									</div>
@@ -119,51 +100,26 @@ export function RegisterPage() {
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<form
-								onSubmit={handleSubmit}
-								className="space-y-4"
-							>
-								{error && (
-									<Alert variant="destructive">
-										<AlertDescription>
-											{error}
-										</AlertDescription>
-									</Alert>
-								)}
-
+							<form onSubmit={handleSubmit} className="space-y-4">
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="firstName">
-											First Name
-										</Label>
+										<Label htmlFor="firstName">First Name</Label>
 										<Input
 											id="firstName"
 											placeholder="John"
 											value={formData.firstName}
-											onChange={(e) =>
-												handleInputChange(
-													"firstName",
-													e.target.value
-												)
-											}
+											onChange={(e) => handleInputChange("firstName", e.target.value)}
 											required
 											className="bg-background"
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="lastName">
-											Last Name
-										</Label>
+										<Label htmlFor="lastName">Last Name</Label>
 										<Input
 											id="lastName"
 											placeholder="Doe"
 											value={formData.lastName}
-											onChange={(e) =>
-												handleInputChange(
-													"lastName",
-													e.target.value
-												)
-											}
+											onChange={(e) => handleInputChange("lastName", e.target.value)}
 											required
 											className="bg-background"
 										/>
@@ -177,12 +133,7 @@ export function RegisterPage() {
 										type="email"
 										placeholder="your.name@nitc.ac.in"
 										value={formData.email}
-										onChange={(e) =>
-											handleInputChange(
-												"email",
-												e.target.value
-											)
-										}
+										onChange={(e) => handleInputChange("email", e.target.value)}
 										required
 										className="bg-background"
 									/>
@@ -190,25 +141,14 @@ export function RegisterPage() {
 
 								<div className="grid grid-cols-2 gap-4">
 									<div className="space-y-2">
-										<Label htmlFor="password">
-											Password
-										</Label>
+										<Label htmlFor="password">Password</Label>
 										<div className="relative">
 											<Input
 												id="password"
-												type={
-													showPassword
-														? "text"
-														: "password"
-												}
+												type={showPassword ? "text" : "password"}
 												placeholder="Create a strong password"
 												value={formData.password}
-												onChange={(e) =>
-													handleInputChange(
-														"password",
-														e.target.value
-													)
-												}
+												onChange={(e) => handleInputChange("password", e.target.value)}
 												required
 												className="bg-background pr-10"
 											/>
@@ -217,11 +157,7 @@ export function RegisterPage() {
 												variant="ghost"
 												size="sm"
 												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-												onClick={() =>
-													setShowPassword(
-														!showPassword
-													)
-												}
+												onClick={() => setShowPassword(!showPassword)}
 											>
 												{showPassword ? (
 													<EyeOff className="w-4 h-4" />
@@ -233,25 +169,14 @@ export function RegisterPage() {
 									</div>
 
 									<div className="space-y-2">
-										<Label htmlFor="confirmPassword">
-											Confirm Password
-										</Label>
+										<Label htmlFor="confirmPassword">Confirm Password</Label>
 										<div className="relative">
 											<Input
 												id="confirmPassword"
-												type={
-													showConfirmPassword
-														? "text"
-														: "password"
-												}
+												type={showConfirmPassword ? "text" : "password"}
 												placeholder="Confirm your password"
 												value={formData.confirmPassword}
-												onChange={(e) =>
-													handleInputChange(
-														"confirmPassword",
-														e.target.value
-													)
-												}
+												onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
 												required
 												className="bg-background pr-10"
 											/>
@@ -260,11 +185,7 @@ export function RegisterPage() {
 												variant="ghost"
 												size="sm"
 												className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-												onClick={() =>
-													setShowConfirmPassword(
-														!showConfirmPassword
-													)
-												}
+												onClick={() => setShowConfirmPassword(!showConfirmPassword)}
 											>
 												{showConfirmPassword ? (
 													<EyeOff className="w-4 h-4" />
@@ -281,50 +202,30 @@ export function RegisterPage() {
 										id="terms"
 										checked={agreedToTerms}
 										onCheckedChange={(checked) => {
-											setAgreedToTerms(
-												checked.valueOf() == true
-											);
+											setAgreedToTerms(checked.valueOf() == true);
 										}}
 									/>
-									<Label
-										htmlFor="terms"
-										className="text-sm"
-									>
+									<Label htmlFor="terms" className="text-sm">
 										I agree to the{" "}
-										<Link
-											to="/terms"
-											className="text-primary hover:underline"
-										>
+										<Link to="/terms" className="text-primary hover:underline">
 											Terms of Service
 										</Link>{" "}
 										and{" "}
-										<Link
-											to="/privacy"
-											className="text-primary hover:underline"
-										>
+										<Link to="/privacy" className="text-primary hover:underline">
 											Privacy Policy
 										</Link>
 									</Label>
 								</div>
 
-								<Button
-									type="submit"
-									className="w-full"
-									disabled={isLoading}
-								>
-									{isLoading
-										? "Creating Account..."
-										: "Create Account"}
+								<Button type="submit" className="w-full" disabled={isPending}>
+									{isPending ? "Creating Account..." : "Create Account"}
 								</Button>
 							</form>
 
 							<div className="mt-6 text-center">
 								<p className="text-sm text-muted-foreground">
 									Already have an account?{" "}
-									<Link
-										to="/login"
-										className="text-primary hover:underline font-medium"
-									>
+									<Link to="/login" className="text-primary hover:underline font-medium">
 										Sign in here
 									</Link>
 								</p>

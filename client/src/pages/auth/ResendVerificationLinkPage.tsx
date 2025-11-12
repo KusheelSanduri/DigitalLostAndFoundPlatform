@@ -1,24 +1,18 @@
-import { useEffect, useState } from "react";
-import { Navbar } from "../../components/common/Navbar";
-import { Label } from "@radix-ui/react-label";
-import { Button } from "../../components/ui/button";
-import {
-	Card,
-	CardHeader,
-	CardTitle,
-	CardDescription,
-	CardContent,
-} from "../../components/ui/card";
-import { Input } from "../../components/ui/input";
-import { authApi } from "../../api/authApi";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../auth/useAuth";
+import {useEffect, useTransition} from "react";
+import {Navbar} from "../../components/common/Navbar";
+import {Button} from "../../components/ui/button";
+import {Card, CardHeader, CardTitle, CardDescription, CardContent} from "../../components/ui/card";
+import {Input} from "../../components/ui/input";
+import {authApi} from "../../api/authApi";
+import {Link, useLocation, useNavigate} from "react-router-dom";
+import {useAuth} from "../../auth/useAuth";
+import {toast} from "sonner";
 
 export function ResendVerificationLinkPage() {
-	const [email, setEmail] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
+	const state = useLocation().state;
+	const [isPending, startTransition] = useTransition();
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	const {user} = useAuth();
 
 	// if already logged in, redirect to items page
 	useEffect(() => {
@@ -27,17 +21,24 @@ export function ResendVerificationLinkPage() {
 		}
 	}, [navigate, user]);
 
-	const handleSubmit = async (e: React.FormEvent) => {
+	if (!state || !state.email) {
+		return <p>Something went wrong...</p>;
+	}
+
+	const submit = async (e: React.FormEvent) => {
 		try {
 			e.preventDefault();
-			setIsLoading(true);
-			await authApi.resendVerificationLink(email);
-			alert("Verification link sent! Check your mailbox");
+			await authApi.resendVerificationLink(state.email);
+			toast.success("Verification link sent. Please Check your inbox.");
 		} catch {
-			alert("Failed to send verification link. Please try again.");
-		} finally {
-			setIsLoading(false);
+			toast.error("Failed to send verification link. Please try again.");
 		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		startTransition(async () => {
+			await submit(e);
+		});
 	};
 
 	return (
@@ -47,49 +48,38 @@ export function ResendVerificationLinkPage() {
 				<div className="w-full max-w-md">
 					<Card>
 						<CardHeader className="text-center">
-							<CardTitle>Verify your Email</CardTitle>
+							<CardTitle>Your Email is not Verified</CardTitle>
 							<CardDescription>
-								If you want us to resend the verification link,
-								enter your email with which you registered
-								below.
+								Kindly check your mailbox for verification email. If you want us to resend the
+								verification link, click the button below.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
-							<form
-								onSubmit={handleSubmit}
-								className="space-y-4"
-							>
-								{/* {error && (
-								<Alert variant="destructive">
-									<AlertDescription>{error}</AlertDescription>
-								</Alert>
-							)} */}
-
+							<form onSubmit={handleSubmit} className="space-y-4">
 								<div className="space-y-2">
-									<Label htmlFor="email">NITC Email</Label>
 									<Input
 										id="email"
 										type="email"
 										placeholder="your.name@nitc.ac.in"
-										value={email}
-										onChange={(e) =>
-											setEmail(e.target.value)
-										}
+										value={state.email}
+										disabled
 										required
-										className="bg-background"
+										className="bg-gray-200"
 									/>
 								</div>
 
-								<Button
-									type="submit"
-									className="w-full"
-									disabled={isLoading}
-								>
-									{isLoading
-										? "Sending Verification Link..."
-										: "Send Verification Link"}
+								<Button type="submit" className="w-full" disabled={isPending}>
+									{isPending ? "Sending Verification Link..." : "Resend Verification Link"}
 								</Button>
 							</form>
+							<div className="mt-6 text-center">
+								<p className="text-sm text-muted-foreground">
+									Want to go back to login?{" "}
+									<Link to="/login" className="text-primary hover:underline font-medium">
+										Click here
+									</Link>
+								</p>
+							</div>
 						</CardContent>
 					</Card>
 				</div>

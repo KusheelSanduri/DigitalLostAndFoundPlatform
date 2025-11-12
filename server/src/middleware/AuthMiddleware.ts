@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { envConfig } from "../config/envConfig";
+import { AuthError } from "../utils/errors/AuthError";
+import { Request, Response, NextFunction } from "express";
 
 export interface AuthRequest extends Request {
-	user?: { id: string; email: string; role?: string };
+	user?: { id: string; email: string; role?: string; isAdmin: boolean };
 }
 
 export function requireAuth(
@@ -26,9 +27,12 @@ export function requireAuth(
 			id: payload.sub,
 			email: payload.email,
 			role: payload.role,
+			isAdmin: payload.role.toLowerCase() == "admin",
 		};
 		next();
-	} catch {
-		return res.status(401).json({ message: "Invalid or expired token" });
+	} catch (err: any) {
+		if (err.name === "TokenExpiredError") throw AuthError.ExpiredToken(err);
+		if (err.name === "JsonWebTokenError") throw AuthError.InvalidToken(err);
+		throw AuthError.Unauthorized(err);
 	}
 }
