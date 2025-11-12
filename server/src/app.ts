@@ -22,7 +22,7 @@ app.use(express.json());
 app.use("/api/auth", AuthRouter);
 app.use("/api/chat", chatRouter);
 app.use("/api/posts", requireAuth, PostRouter);
-app.use("/api", AdminRoutes);
+app.use("/api/admin", requireAuth, AdminRoutes);
 app.use("/api/disputes", requireAuth, DisputeRoutes);
 
 app.get("/api/auth/me", requireAuth, (req: AuthRequest, res) => {

@@ -231,6 +231,7 @@ export class AuthController {
 			const data = {
 				id: req.user?.id,
 				email: req.user?.email,
+				role: req.user?.role,
 				name: "Placeholder name",
 			};
 			res.status(200).json(
