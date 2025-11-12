@@ -6,14 +6,12 @@ class DisputeService {
     userId: Types.ObjectId,
     postId: Types.ObjectId,
     reason: string,
-    evidence?: string[]
   ): Promise<IDispute> {
     try {
       const dispute = new Dispute({
         userId,
         postId,
         reason,
-        evidence,
         status: "pending",
         createdAt: new Date(),
       });

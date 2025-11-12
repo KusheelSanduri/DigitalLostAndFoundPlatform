@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../../lib/api";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import RaiseDisputeModal from "../../components/common/RaiseDisputeModal";
 
 export default function PostChatPage() {
     const { postId } = useParams();
     // console.log( postId );
     const [messages, setMessages] = useState<any[]>([]);
     const [text, setText] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [senderName] = useState(() => {
         // Try to load existing senderName for this post
         const storedName = localStorage.getItem(`chat_sender_${postId}`);
@@ -45,7 +49,7 @@ export default function PostChatPage() {
     }, [postId]);
 
     const fetchMessages = async () => {
-        if ( !postId) return;
+        if (!postId) return;
 
         try {
             const data = await api.getMessages(postId);
@@ -185,18 +189,11 @@ export default function PostChatPage() {
         </div>
 
         <div style={{ display: "flex", gap: 8 }}>
-            <input
+            <Input
+                placeholder="Type a message..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder={`Type a message as ${senderName}...`}
-                // disabled={ loading }
-                style={{
-                    flex: 1,
-                    padding: 10,
-                    borderRadius: 6,
-                    border: "1px solid #d1d5db",
-                    fontSize: 14,
-                }}
+                className="bg-background"
                 onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                         e.preventDefault();
@@ -204,38 +201,14 @@ export default function PostChatPage() {
                     }
                 }}
             />
-            <button
-                onClick={handleSend}
-                // disabled={ loading || !text.trim() }
-                style={{
-                    padding: "10px 20px",
-                    borderRadius: 6,
-                    backgroundColor: "#3b82f6",
-                    color: "white",
-                    border: "none",
-                    // cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-                    cursor: "pointer",
-                    // opacity: loading || !text.trim() ? 0.6 : 1,
-                    fontWeight: 500,
-                }}
-            >
+            <Button onClick={handleSend}>
                 Send
-            </button>
-            <button
-                style={{
-                    padding: "10px 20px",
-                    borderRadius: 6,
-                    backgroundColor: "#f6443bff",
-                    color: "white",
-                    border: "none",
-                    // cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-                    cursor: "pointer",
-                    // opacity: loading || !text.trim() ? 0.6 : 1,
-                    fontWeight: 500,
-                }}
-            >
+            </Button>
+            <RaiseDisputeModal postId={postId} open={isModalOpen} onOpenChange={setIsModalOpen}/>
+            <Button variant="destructive" onClick={() => setIsModalOpen(true)}>
                 Raise Dispute
-            </button>
+            </Button>
+
         </div>
     </div>
 }
