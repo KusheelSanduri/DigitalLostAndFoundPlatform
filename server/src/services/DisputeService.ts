@@ -4,14 +4,14 @@ import { IDispute, Dispute } from "../models/Dispute";
 class DisputeService {
   async createDispute(
     userId: Types.ObjectId,
-    itemId: Types.ObjectId,
+    postId: Types.ObjectId,
     reason: string,
     evidence?: string[]
   ): Promise<IDispute> {
     try {
       const dispute = new Dispute({
         userId,
-        itemId,
+        postId,
         reason,
         evidence,
         status: "pending",
@@ -42,7 +42,7 @@ class DisputeService {
       const query = status ? { status } : {};
       return await Dispute.find(query)
         .populate("userId", "name email")
-        .populate("itemId", "title")
+        .populate("postId", "title")
         .sort({ createdAt: -1 });
     } catch (error) {
       console.error("Error fetching all disputes:", error);

@@ -12,19 +12,19 @@ import {
 	Flag,
 	Users,
 	FileText,
-	Search,
 	ArrowRight,
 	Clock,
 } from "lucide-react";
 import { Link, Navigate } from "react-router-dom";
 import { adminStatsApi } from "../../api/adminStatsApi";
 import { useAuth } from "../../auth/useAuth";
+import { Navbar } from "../../components/common/Navbar";
 
 export default function AdminDashboard() {
 	const { user } = useAuth();
 	const isAdmin = user?.role === "admin";
 
-	const [stats, setStats] = useState({
+	const [Stats, setStats] = useState({
 		totalUsers: 0,
 		activePosts: 0,
 		totalDisputes: 0,
@@ -51,27 +51,14 @@ export default function AdminDashboard() {
 	return (
 		<div className="min-h-screen bg-background">
 			{/* Header */}
-			<header className="border-b border-border bg-card/50 backdrop-blur-sm">
-				<div className="container mx-auto px-4 py-4 flex items-center justify-between">
-					<h1 className="text-2xl font-bold">Admin Dashboard</h1>
-					<Link to="/" className="flex items-center gap-2">
-						<div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-							<Search className="w-4 h-4 text-primary-foreground" />
-						</div>
-						<span className="font-bold text-xl text-foreground">
-							NITC Lost & Found
-						</span>
-					</Link>
-				</div>
-			</header>
+			<Navbar/>
 
-			<div className="container mx-auto px-4 py-8">
+			<div className="container mx-auto py-8 px-12">
 				{/* Welcome Section */}
 				<div className="mb-8">
 					<h2 className="text-3xl font-bold mb-2">Welcome back, Admin</h2>
 					<p className="text-muted-foreground">
-						Manage the NITC Lost & Found platform, monitor disputes, and oversee
-						community activities.
+						Manage the platform, monitor and resolve disputes.
 					</p>
 				</div>
 
@@ -86,7 +73,7 @@ export default function AdminDashboard() {
 										Total Users
 									</p>
 									<p className="text-2xl font-bold">
-										{loading ? "..." : stats.totalUsers}
+										{loading ? "..." : Stats.totalUsers}
 									</p>
 								</div>
 								<Users className="w-8 h-8 text-primary" />
@@ -103,7 +90,7 @@ export default function AdminDashboard() {
 										Active Posts
 									</p>
 									<p className="text-2xl font-bold">
-										{loading ? "..." : stats.activePosts}
+										{loading ? "..." : Stats.activePosts}
 									</p>
 								</div>
 								<FileText className="w-8 h-8 text-primary" />
@@ -120,7 +107,7 @@ export default function AdminDashboard() {
 										Total Disputes
 									</p>
 									<p className="text-2xl font-bold">
-										{loading ? "..." : stats.totalDisputes}
+										{loading ? "..." : Stats.totalDisputes}
 									</p>
 								</div>
 								<Flag className="w-8 h-8 text-destructive" />
@@ -137,10 +124,10 @@ export default function AdminDashboard() {
 										Pending Disputes
 									</p>
 									<p className="text-2xl font-bold text-yellow-600">
-										{loading ? "..." : stats.pendingDisputes}
+										{loading ? "..." : Stats.pendingDisputes}
 									</p>
 									<p className="text-xs text-muted-foreground mt-1">
-										{loading ? "..." : stats.resolvedDisputes} resolved
+										{loading ? "..." : Stats.resolvedDisputes} resolved
 									</p>
 								</div>
 								<Clock className="w-8 h-8 text-yellow-600" />
@@ -167,13 +154,13 @@ export default function AdminDashboard() {
 								<div className="flex items-center justify-between">
 									<span className="text-sm">Pending Reviews</span>
 									<Badge variant="secondary">
-										{loading ? "..." : stats.pendingDisputes}
+										{loading ? "..." : Stats.pendingDisputes}
 									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
 									<span className="text-sm">Resolved</span>
 									<Badge variant="outline">
-										{loading ? "..." : stats.resolvedDisputes}
+										{loading ? "..." : Stats.resolvedDisputes}
 									</Badge>
 								</div>
 							</div>

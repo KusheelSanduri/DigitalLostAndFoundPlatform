@@ -40,4 +40,4 @@ router.get("/stats", async (req: AuthRequest, res: Response) => {
 	}
 });
 
-export default router;
+export { router as AdminRouter };
