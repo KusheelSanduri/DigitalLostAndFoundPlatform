@@ -6,8 +6,8 @@ import { AuthController } from "./controllers/AuthController";
 import { envConfig } from "./config/envConfig";
 import { PostRouter } from "./routes/PostRoutes";
 import DisputeRoutes from "./routes/DisputeRoutes";
-import chatRouter from "../src/routes/chat";
-import {AdminRouter} from "./routes/AdminRoutes";
+import { ChatRouter } from "./routes/ChatRoutes";
+import { AdminRouter } from "./routes/AdminRoutes";
 import { errorHandler } from "./middleware/ErrorHandler";
 
 const app = express();
@@ -20,7 +20,7 @@ app.use(
 app.use(express.json());
 
 app.use("/api/auth", AuthRouter);
-app.use("/api/chat", chatRouter);
+app.use("/api/chat", requireAuth, ChatRouter);
 app.use("/api/posts", requireAuth, PostRouter);
 app.use("/api/admin", requireAuth, AdminRouter);
 app.use("/api/disputes", requireAuth, DisputeRoutes);

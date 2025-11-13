@@ -1,90 +1,109 @@
-import {useEffect, useRef, useState} from "react";
-import {useParams} from "react-router-dom";
-import {api} from "../../lib/api";
+import {useEffect, useRef, useState, useTransition} from "react";
+import {useNavigate, useParams} from "react-router-dom";
+import {useAuth} from "../../auth/useAuth";
+import {chatApi} from "../../api/chatApi";
+import {toast} from "sonner";
+
+interface IChatMessage {
+	_id: string;
+	roomId: string;
+	senderName: string;
+	text: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
 
 export default function PostChatPage() {
 	const {postId} = useParams();
-	// console.log( postId );
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const [messages, setMessages] = useState<any[]>([]);
-	const [text, setText] = useState("");
-	const [senderName] = useState(() => {
-		// Try to load existing senderName for this post
-		const storedName = localStorage.getItem(`chat_sender_${postId}`);
-		if (storedName) return storedName;
+	const {user} = useAuth();
+	const navigate = useNavigate();
 
-		// Generate new name if not found
-		const newName = `Anonymous${Math.floor(Math.random() * 9000) + 1000}`;
-		localStorage.setItem(`chat_sender_${postId}`, newName);
-		return newName;
-	});
-
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState("");
-	const pollingRef = useRef<number | null>(null);
-
-	// Ensure room exists when component mounts
+	/**
+	 * Send the Unauthenticated users to login page
+	 * Only allow authenticated users to be on this page
+	 */
 	useEffect(() => {
-		const ensureRoom = async () => {
-			if (!postId) return;
+		if (!user || user === null) {
+			navigate("/login");
+		}
+	}, [navigate, user]);
 
+	const [messages, setMessages] = useState<IChatMessage[]>([]);
+	const [text, setText] = useState("");
+	const pollingRef = useRef<number | null>(null);
+	const [isPending, startTransition] = useTransition();
+	let fetchFailedShown = false;
+
+	const ensureRoom = (postId: string) => {
+		startTransition(async () => {
 			try {
-				setLoading(true);
-				// Try to fetch messages - if room doesn't exist, the message creation will handle it
-				await api.getMessages(postId);
-				setError("");
-			} catch (err) {
-				console.error("Room may not exist:", err);
-				// Room will be created automatically when first message is sent
-				setError("");
-			} finally {
-				setLoading(false);
+				await chatApi.getMessages(postId);
+			} catch {
+				toast.error("Chat may not exist.");
 			}
-		};
+		});
+	};
 
-		ensureRoom();
+	/**
+	 * This ensure that room exists when this page is loaded
+	 * or when postId changes
+	 */
+	useEffect(() => {
+		if (!postId) return;
+		ensureRoom(postId);
 	}, [postId]);
 
-	const fetchMessages = async () => {
-		if (!postId) return;
-
-		try {
-			const data = await api.getMessages(postId);
-			setMessages([...data]);
-			setError("");
-		} catch (e) {
-			console.error("Failed to fetch messages:", e);
-			// Don't show error on every poll, only set error state silently
-		}
+	const fetchMessages = async (postId: string) => {
+		startTransition(async () => {
+			try {
+				const res = await chatApi.getMessages(postId);
+				const data = res.data;
+				setMessages([...data]);
+			} catch (e) {
+				if (fetchFailedShown) {
+					toast.error("Failed to load chat messages. Please refresh the page.");
+					console.log("Error while fetching messages: ", e);
+					fetchFailedShown = true;
+				}
+			}
+		});
 	};
 
 	useEffect(() => {
 		if (!postId) return;
-
-		fetchMessages();
-		pollingRef.current = window.setInterval(fetchMessages, 2000);
+		fetchMessages(postId);
+		pollingRef.current = window.setInterval(() => fetchMessages(postId), 2000);
 		return () => {
 			if (pollingRef.current) window.clearInterval(pollingRef.current);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [postId]);
 
+	if (!user || !user.username) {
+		return <>You need to be logged in.</>;
+	}
+
+	const senderName = user.username;
+	if (!postId || !postId.trim()) {
+		return <>Please go to a post chat page</>;
+	}
+
 	const handleSend = async () => {
 		if (!text.trim() || !postId) return;
-
-		try {
-			await api.createMessage(postId, senderName, text);
-			setText("");
-			// Immediately fetch new messages
-			await fetchMessages();
-			setError("");
-		} catch (e) {
-			console.error("Failed to send message:", e);
-			setError("Failed to send message. Please try again.");
-		}
+		startTransition(async () => {
+			try {
+				// await api.createMessage(postId, senderName, text);
+				await chatApi.createMessage(postId, text);
+				setText("");
+				await fetchMessages(postId);
+			} catch (e) {
+				console.error("Failed to send message:", e);
+				toast.error("Failed to send message. Please try again.");
+			}
+		});
 	};
 
-	if (loading && messages.length === 0) {
+	if (isPending && messages.length === 0) {
 		return (
 			<div style={{maxWidth: 800, margin: "0 auto", padding: 16}}>
 				<h2>Loading chat room...</h2>
@@ -92,30 +111,16 @@ export default function PostChatPage() {
 		);
 	}
 
-	if (postId == "" || !postId) return <>Please go to a post chat page</>;
-
 	return (
 		<div style={{maxWidth: 800, margin: "0 auto", padding: 16}}>
 			<div style={{marginBottom: 16}}>
-				<h2>Anonymous Chat - Room: {postId}</h2>
+				<h2>
+					Anonymous Chat - Room: {postId} - {user.username}
+				</h2>
 				<p style={{fontSize: 14, color: "#666", marginTop: 4}}>
 					You are: <strong>{senderName}</strong> | Share this room ID to let others join
 				</p>
 			</div>
-
-			{error && (
-				<div
-					style={{
-						padding: 12,
-						marginBottom: 12,
-						backgroundColor: "#fee2e2",
-						color: "#dc2626",
-						borderRadius: 4,
-					}}
-				>
-					{error}
-				</div>
-			)}
 
 			<div
 				style={{
