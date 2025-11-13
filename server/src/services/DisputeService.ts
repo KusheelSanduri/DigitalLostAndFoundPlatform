@@ -5,13 +5,15 @@ class DisputeService {
 	async createDispute(
 		userId: Types.ObjectId,
 		postId: Types.ObjectId,
-		reason: string
+		reason: string,
+		description: string
 	): Promise<IDispute> {
 		try {
 			const dispute = new Dispute({
 				userId,
 				postId,
 				reason,
+				description,
 				status: "pending",
 				createdAt: new Date(),
 			});

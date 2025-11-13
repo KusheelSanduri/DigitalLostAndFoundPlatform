@@ -1,9 +1,11 @@
-import {useState} from "react";
+import {useState, useTransition} from "react";
 import {Button} from "../ui/button";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter} from "../ui/dialog";
 import {Label} from "../ui/label";
 import {Input} from "../ui/input";
 import {Textarea} from "../ui/textarea";
+import {disputeApi} from "../../api/disputeApi";
+import {toast} from "sonner";
 
 interface RaiseDisputeModalProps {
 	postId: string;
@@ -14,24 +16,29 @@ interface RaiseDisputeModalProps {
 export default function RaiseDisputeModal({postId, open, onOpenChange}: RaiseDisputeModalProps) {
 	const [reason, setReason] = useState("");
 	const [description, setDescription] = useState("");
+	const [isPending, startTrasition] = useTransition();
 
 	const handleRaiseDispute = () => {
 		if (!reason.trim()) {
-			alert("Please enter a reason for the dispute.");
+			toast.error("Please enter a reason for the dispute.");
+			return;
+		}
+		if (!description.trim()) {
+			toast.error("Please enter a description for the dispute.");
 			return;
 		}
 
-		console.log({
-			reason,
-			description,
+		startTrasition(async () => {
+			try {
+				await disputeApi.createDispute(postId, reason, description);
+				onOpenChange(false);
+				setReason("");
+				setDescription("");
+				toast.error("Dispute raised successfully.");
+			} catch {
+				toast.error("Failed to create a dispute. Please try again");
+			}
 		});
-
-		// TODO: Integrate with backend API here
-		// e.g., axios.post('/api/disputes', { reason, description })
-
-		onOpenChange(false);
-		setReason("");
-		setDescription("");
 	};
 
 	return (
@@ -50,6 +57,7 @@ export default function RaiseDisputeModal({postId, open, onOpenChange}: RaiseDis
 							id="reason"
 							placeholder="Enter reason"
 							value={reason}
+							disabled={isPending}
 							onChange={(e) => setReason(e.target.value)}
 						/>
 					</div>
@@ -60,16 +68,19 @@ export default function RaiseDisputeModal({postId, open, onOpenChange}: RaiseDis
 							id="description"
 							placeholder="Describe your issue..."
 							value={description}
+							disabled={isPending}
 							onChange={(e) => setDescription(e.target.value)}
 						/>
 					</div>
 				</div>
 
 				<DialogFooter className="mt-6 flex justify-end gap-3">
-					<Button variant="outline" onClick={() => onOpenChange(false)}>
+					<Button variant="outline" disabled={isPending} onClick={() => onOpenChange(false)}>
 						Cancel
 					</Button>
-					<Button onClick={handleRaiseDispute}>Raise Dispute</Button>
+					<Button onClick={handleRaiseDispute} disabled={isPending}>
+						Raise Dispute
+					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
