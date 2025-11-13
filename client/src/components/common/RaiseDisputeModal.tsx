@@ -55,7 +55,7 @@ export default function RaiseDisputeModal({ postId, open, onOpenChange }: RaiseD
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 mt-3">
+                <div className="space-y-4 mt-3 ">
                     <div className="space-y-2">
                         <Label htmlFor="reason">Reason</Label>
                         <Input

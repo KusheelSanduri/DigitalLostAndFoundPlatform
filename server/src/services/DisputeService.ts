@@ -24,6 +24,7 @@ class DisputeService {
     }
   }
 
+  
   /*Get all disputes filed by a specific user*/
   async getUserDisputes(userId: Types.ObjectId): Promise<IDispute[]> {
     try {

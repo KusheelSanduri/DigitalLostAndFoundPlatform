@@ -16,6 +16,7 @@ export default function PostChatPage() {
         const storedName = localStorage.getItem(`chat_sender_${postId}`);
         if (storedName) return storedName;
 
+        
         // Generate new name if not found
         const newName = `Anonymous${Math.floor(Math.random() * 9000) + 1000}`;
         localStorage.setItem(`chat_sender_${postId}`, newName);
