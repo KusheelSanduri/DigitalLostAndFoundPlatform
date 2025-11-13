@@ -18,7 +18,7 @@ const disputeSchema = new Schema<IDispute>(
     reason: { type: String, required: true },
     description: { type: String, required: true },
     status: { type: String, enum: ["pending", "resolved"], default: "pending" },
-    adminRemarks: { type: String, required: true },
+    adminRemarks: { type: String},
     resolvedAt: { type: Date},
   },
   { timestamps: { createdAt: "createdAt"} }

@@ -7,7 +7,7 @@ import {ResendVerificationLinkPage} from "./pages/auth/ResendVerificationLinkPag
 import AllPostsPage from "./pages/posts/AllPostsPage";
 import CreatePostPage from "./pages/posts/CreatePostPage";
 import AdminDashboard from "./pages/admin/AdminDashboardPage";
-import AdminDisputesPage from "./pages/admin/dispute";
+import AdminDisputesPage from "./pages/admin/AdminDisputePage";
 import {VerifyEmailPage} from "./pages/auth/VerifyEmailPage";
 import {ResetPasswordPage} from "./pages/auth/ResetPasswordPage";
 import PostChatPage from "./pages/posts/PostChatPage";
