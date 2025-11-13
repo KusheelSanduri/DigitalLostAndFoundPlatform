@@ -3,6 +3,9 @@ import {useNavigate, useParams} from "react-router-dom";
 import {useAuth} from "../../auth/useAuth";
 import {chatApi} from "../../api/chatApi";
 import {toast} from "sonner";
+import {Input} from "../../components/ui/input";
+import {Button} from "../../components/ui/button";
+import RaiseDisputeModal from "../../components/common/RaiseDisputeModal";
 
 interface IChatMessage {
 	_id: string;
@@ -17,6 +20,7 @@ export default function PostChatPage() {
 	const {postId} = useParams();
 	const {user} = useAuth();
 	const navigate = useNavigate();
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	/**
 	 * Send the Unauthenticated users to login page
@@ -177,18 +181,11 @@ export default function PostChatPage() {
 			</div>
 
 			<div style={{display: "flex", gap: 8}}>
-				<input
+				<Input
+					placeholder="Type a message..."
 					value={text}
 					onChange={(e) => setText(e.target.value)}
-					placeholder={`Type a message as ${senderName}...`}
-					// disabled={ loading }
-					style={{
-						flex: 1,
-						padding: 10,
-						borderRadius: 6,
-						border: "1px solid #d1d5db",
-						fontSize: 14,
-					}}
+					className="bg-background"
 					onKeyDown={(e) => {
 						if (e.key === "Enter" && !e.shiftKey) {
 							e.preventDefault();
@@ -196,38 +193,11 @@ export default function PostChatPage() {
 						}
 					}}
 				/>
-				<button
-					onClick={handleSend}
-					// disabled={ loading || !text.trim() }
-					style={{
-						padding: "10px 20px",
-						borderRadius: 6,
-						backgroundColor: "#3b82f6",
-						color: "white",
-						border: "none",
-						// cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-						cursor: "pointer",
-						// opacity: loading || !text.trim() ? 0.6 : 1,
-						fontWeight: 500,
-					}}
-				>
-					Send
-				</button>
-				<button
-					style={{
-						padding: "10px 20px",
-						borderRadius: 6,
-						backgroundColor: "#f6443bff",
-						color: "white",
-						border: "none",
-						// cursor: loading || !text.trim() ? "not-allowed" : "pointer",
-						cursor: "pointer",
-						// opacity: loading || !text.trim() ? 0.6 : 1,
-						fontWeight: 500,
-					}}
-				>
+				<Button onClick={handleSend}>Send</Button>
+				<RaiseDisputeModal postId={postId} open={isModalOpen} onOpenChange={setIsModalOpen} />
+				<Button variant="destructive" onClick={() => setIsModalOpen(true)}>
 					Raise Dispute
-				</button>
+				</Button>
 			</div>
 		</div>
 	);
