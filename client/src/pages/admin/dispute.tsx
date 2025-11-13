@@ -277,6 +277,16 @@ export default function AdminDisputesPage() {
 																		}
 																	</p>
 																</div>
+																<div>
+																	<span className="text-sm font-medium">
+																		Evidence:
+																	</span>
+																	<p className="text-sm mt-1">
+																		{
+																			selectedDispute.evidence
+																		}
+																	</p>
+																</div>
 															</div>
 														</div>
 
