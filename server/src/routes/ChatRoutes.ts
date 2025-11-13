@@ -1,8 +1,21 @@
 import { Router } from "express";
-import chatRouter from "./chat";
+import {
+	createMessage,
+	createRoom,
+	getMessages,
+	getRoomByItem,
+} from "../controllers/ChatController";
 
 const router = Router();
 
-router.use("/chat", chatRouter);
+// Create a room (optionally tied to an item)
+router.post("/rooms", createRoom);
 
-export default router;
+// Get room by itemId
+router.get("/rooms/item/:itemId", getRoomByItem);
+
+// Messages for a room
+router.post("/:roomId/messages", createMessage);
+router.get("/:roomId/messages", getMessages);
+
+export { router as ChatRouter };

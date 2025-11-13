@@ -14,10 +14,8 @@ export const errorHandler = (
 	let errorCode = err.errorCode || "SERVER_ERROR";
 	let details = err.details || null;
 
-	if (process.env.NODE_ENV === "development") {
-		console.error("🔥 Error:", err);
-	}
-
+	console.error("🔥 Error:", err);
+	
 	if (err instanceof AppError) {
 		console.log(
 			"Error is being handled: ",

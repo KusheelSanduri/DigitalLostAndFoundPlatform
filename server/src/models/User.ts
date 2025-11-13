@@ -6,6 +6,7 @@ export interface IUser extends Document {
 	passwordHash: string;
 	isVerified: boolean;
 	role: string;
+	username: string;
 	verifyTokenHash?: string;
 	verifyTokenExpires?: Date;
 	resetTokenHash?: string;
@@ -15,6 +16,7 @@ export interface IUser extends Document {
 
 const userSchema = new Schema<IUser>({
 	name: { type: String, required: true },
+	username: { type: String, required: true },
 	email: { type: String, required: true, unique: true, lowercase: true },
 	passwordHash: { type: String, required: true },
 	isVerified: { type: Boolean, default: false },

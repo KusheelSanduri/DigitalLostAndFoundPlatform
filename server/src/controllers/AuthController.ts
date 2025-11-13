@@ -8,6 +8,7 @@ import { SuccessResponse } from "../utils/ApiResponse";
 import { ValidationError } from "../utils/errors/ValidationError";
 import { AuthError } from "../utils/errors/AuthError";
 import mongoose from "mongoose";
+import { generateAnonymousUsername } from "../utils/GenerateAnonymousUsername";
 
 export class AuthController {
 	private static ORG_DOMAIN = envConfig.ORGANIZATION_DOMAIN;
@@ -35,7 +36,24 @@ export class AuthController {
 		session.startTransaction();
 
 		try {
-			const user = await UserService.createUser(name, email, password);
+			let username = generateAnonymousUsername();
+			let isUniqueUsername =
+				UserService.findByUsername(username) === null;
+
+			// Regenerate until got unique username
+			// With out setup there are 35 million unique usernames
+			while (!isUniqueUsername) {
+				username = generateAnonymousUsername();
+				isUniqueUsername =
+					UserService.findByUsername(username) === null;
+			}
+
+			const user = await UserService.createUser(
+				name,
+				email,
+				password,
+				username
+			);
 			const token = TokenService.generateRandomToken();
 			await UserService.setVerifyToken(user, token);
 			await NodeMailerEmailService.sendVerificationEmail(email, token);
@@ -43,7 +61,7 @@ export class AuthController {
 
 			res.status(201).json(
 				new SuccessResponse(
-					"Registered successful. Check your email to verify account.",
+					"Registration successful. Check your email to verify account.",
 					undefined,
 					201
 				)
@@ -232,6 +250,7 @@ export class AuthController {
 				id: req.user?.id,
 				email: req.user?.email,
 				role: req.user?.role,
+				username: req.user?.username,
 				name: "Placeholder name",
 			};
 			res.status(200).json(

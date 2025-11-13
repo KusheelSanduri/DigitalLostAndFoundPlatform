@@ -8,19 +8,24 @@ export class UserService {
 	public static async createUser(
 		name: string,
 		email: string,
-		password: string
+		password: string,
+		anonymousUsername: string
 	): Promise<IUser> {
 		const passwordHash = await bcrypt.hash(
 			password,
 			UserService.saltRounds
 		);
-		const user = new User({ name, email, passwordHash });
+		const user = new User({ name, email, passwordHash, anonymousUsername });
 		await user.save();
 		return user;
 	}
 
 	public static findByEmail(email: string): Promise<IUser | null> {
 		return User.findOne({ email });
+	}
+
+	public static findByUsername(username: string): Promise<IUser | null> {
+		return User.findOne({ username });
 	}
 
 	public static async setVerifyToken(

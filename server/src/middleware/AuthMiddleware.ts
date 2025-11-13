@@ -4,7 +4,13 @@ import { AuthError } from "../utils/errors/AuthError";
 import { Request, Response, NextFunction } from "express";
 
 export interface AuthRequest extends Request {
-	user?: { id: string; email: string; role?: string; isAdmin: boolean };
+	user?: { 
+		id: string; 
+		email: string; 
+		role?: string; 
+		isAdmin: boolean;
+		username: string;
+	};
 }
 
 export function requireAuth(
@@ -22,12 +28,14 @@ export function requireAuth(
 			sub: string;
 			email: string;
 			role: string;
+			username: string;
 		};
 		req.user = {
 			id: payload.sub,
 			email: payload.email,
 			role: payload.role,
 			isAdmin: payload.role.toLowerCase() == "admin",
+			username: payload.username
 		};
 		next();
 	} catch (err: any) {

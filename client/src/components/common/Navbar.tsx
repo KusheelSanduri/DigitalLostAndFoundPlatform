@@ -16,9 +16,14 @@ export function Navbar() {
 					<span className="font-bold text-xl text-foreground">Lost & Found</span>
 				</div>
 				<nav className="hidden md:flex items-center gap-6">
-					{isAdmin === true && <Link to="/admin/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-						Admin Dashboard
-					</Link>}
+					{isAdmin === true && (
+						<Link
+							to="/admin/dashboard"
+							className="text-muted-foreground hover:text-foreground transition-colors"
+						>
+							Admin Dashboard
+						</Link>
+					)}
 					<Link to="/posts" className="text-muted-foreground hover:text-foreground transition-colors">
 						Posts
 					</Link>
@@ -41,6 +46,7 @@ export function Navbar() {
 						</>
 					) : (
 						<>
+							<p>{user.username}</p>
 							<Link to="/posts/create">
 								<Button>Report an Item</Button>
 							</Link>
